@@ -21,7 +21,7 @@ function randomNumberWithUniformDistribution(range)
     // Based on the algorithn described in https://pthree.org/2018/06/13/why-the-multiply-and-floor-rng-method-is-biased/
     var max = Math.floor(2**32 / range) * range;
     do {
-        var x = window.crypto.getRandomValues(new Uint32Array(1))[0];
+        var x = crypto.getRandomValues(new Uint32Array(1))[0];
     } while (x >= max);
 
     return (x % range);
