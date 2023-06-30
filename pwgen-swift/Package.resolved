@@ -6,7 +6,7 @@
       "location" : "https://github.com/YourMJK/CommandLineTool",
       "state" : {
         "branch" : "main",
-        "revision" : "324dbb4d343b2e0d19c20fd5889f585f54484ec4"
+        "revision" : "715310cce5434b30c63ea5a57869311270193b5d"
       }
     },
     {
@@ -15,7 +15,7 @@
       "location" : "https://github.com/YourMJK/swift-argument-parser",
       "state" : {
         "branch" : "main",
-        "revision" : "e323f3feb07c64e05db8db0ac0ad73bd5ceae6ae"
+        "revision" : "3bf4005485ef403426358e5c315b9bbb232e4963"
       }
     }
   ],
