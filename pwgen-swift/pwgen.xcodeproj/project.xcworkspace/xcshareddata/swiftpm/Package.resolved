@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "commandlinetool",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/YourMJK/CommandLineTool.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "387da842de30170f1eeef078279d5f2bb1bcc985"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/YourMJK/swift-argument-parser",
+      "state" : {
+        "branch" : "main",
+        "revision" : "e323f3feb07c64e05db8db0ac0ad73bd5ceae6ae"
+      }
+    }
+  ],
+  "version" : 2
+}
