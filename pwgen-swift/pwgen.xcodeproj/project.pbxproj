@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		184326652A4F84E20039E73E /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184326642A4F84E20039E73E /* Command.swift */; };
 		1843267E2A4F92B70039E73E /* CommandLineTool in Frameworks */ = {isa = PBXBuildFile; productRef = 1843267D2A4F92B70039E73E /* CommandLineTool */; };
+		18F26D722A55BBA10078AF71 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = 18F26D712A55BBA10078AF71 /* OrderedCollections */; };
 		18F72E992A4FAC0C0037B09E /* Generator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F72E982A4FAC0C0037B09E /* Generator.swift */; };
 /* End PBXBuildFile section */
 
@@ -36,6 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				18F26D722A55BBA10078AF71 /* OrderedCollections in Frameworks */,
 				1843267E2A4F92B70039E73E /* CommandLineTool in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -95,6 +97,7 @@
 			name = pwgen;
 			packageProductDependencies = (
 				1843267D2A4F92B70039E73E /* CommandLineTool */,
+				18F26D712A55BBA10078AF71 /* OrderedCollections */,
 			);
 			productName = pwgen;
 			productReference = 184326612A4F84E20039E73E /* pwgen */;
@@ -126,6 +129,7 @@
 			mainGroup = 184326582A4F84E20039E73E;
 			packageReferences = (
 				1843267C2A4F92B70039E73E /* XCRemoteSwiftPackageReference "CommandLineTool" */,
+				18F26D702A55BBA10078AF71 /* XCRemoteSwiftPackageReference "swift-collections" */,
 			);
 			productRefGroup = 184326622A4F84E20039E73E /* Products */;
 			projectDirPath = "";
@@ -313,6 +317,14 @@
 				kind = branch;
 			};
 		};
+		18F26D702A55BBA10078AF71 /* XCRemoteSwiftPackageReference "swift-collections" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-collections.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -320,6 +332,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1843267C2A4F92B70039E73E /* XCRemoteSwiftPackageReference "CommandLineTool" */;
 			productName = CommandLineTool;
+		};
+		18F26D712A55BBA10078AF71 /* OrderedCollections */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 18F26D702A55BBA10078AF71 /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = OrderedCollections;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

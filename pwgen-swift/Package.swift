@@ -9,13 +9,15 @@ let package = Package(
 		.executable(name: "pwgen", targets: ["pwgen"]),
 	],
 	dependencies: [
-		.package(url: "https://github.com/YourMJK/CommandLineTool", branch: "main"),
+		.package(url: "https://github.com/YourMJK/CommandLineTool.git", branch: "main"),
+		.package(url: "https://github.com/apple/swift-collections.git", .upToNextMajor(from: "1.0.0")),
 	],
 	targets: [
 		.executableTarget(
 			name: "pwgen",
 			dependencies: [
-				"CommandLineTool"
+				"CommandLineTool",
+				.product(name: "OrderedCollections", package: "swift-collections")
 			],
 			path: "pwgen"
 		),
