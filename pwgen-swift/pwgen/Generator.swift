@@ -7,66 +7,94 @@
 //
 
 import Foundation
+import OrderedCollections
+
+
+extension Generator {
+	typealias CharacterSet = OrderedSet<Character>
+}
+
+extension Generator.CharacterSet {
+	static let lower = Self("abcdefghijklmnopqrstuvwxyz")
+	static let upper = Self("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	static let digit = Self("0123456789")
+	static let special = Self(#"-~!@#$%^&*_+=`|(){}[:;\"'<>,.?/ ]"#)
+	
+	static let ascii = Self(joined: .lower, .upper, .digit, .special)
+	static let alphanumeric = Self(joined: .lower, .upper, .digit)
+	static let unambiguous = Self.alphanumeric.subtracting(["l", "O"])
+	
+	static let lowerConsonants = Self("bcdfghjkmnpqrstvwxz")
+	static let lowerVowels = Self("aeiouy")
+	
+	private init(joined elements: Self...) {
+		self.init(uncheckedUniqueElements: elements.joined())
+	}
+}
+
 
 struct Generator {
-	static let defaultUnambiguousCharacters = [Character]("abcdefghijkmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ0123456789")
+	static let defaultUnambiguousCharacters = CharacterSet.unambiguous
 	
 	static let defaultNumberOfCharactersForClassicPassword = 12
 	static let defaultClassicPasswordLength = 15
 	
 	static let defaultNumberOfCharactersForMoreTypeablePassword = 18
 	static let defaultMoreTypeablePasswordLength = 20
-	static let defaultAllowedNumbers = [Character]("0123456789")
-	static let defaultAllowedLowercaseConsonants = [Character]("bcdfghjkmnpqrstvwxz")
-	static let defaultAllowedLowercaseVowels = [Character]("aeiouy")
+	static let defaultAllowedNumbers = CharacterSet.digit
+	static let defaultAllowedLowercaseConsonants = CharacterSet.lowerConsonants
+	static let defaultAllowedLowercaseVowels = CharacterSet.lowerVowels
 	
-	private static let lowercaseCharacterSet = Set<Character>("abcdefghijklmnopqrstuvwxyz")
-	private static let uppercaseCharacterSet = Set<Character>("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	private static let numberCharacterSet = Set<Character>("0123456789")
-	static let defaultRequiredCharacterSets = [lowercaseCharacterSet, uppercaseCharacterSet, numberCharacterSet]
+	private static let lowercaseCharacterSet = CharacterSet.lower
+	private static let uppercaseCharacterSet = CharacterSet.upper
+	private static let numberCharacterSet = CharacterSet.digit
+	static let defaultRequiredCharacterSets: [CharacterSet] = [.lower, .upper, .digit]
 	
-	
-	private typealias CharacterCollection = Collection<Character>
 	
 	struct Requirements {
 		let minLength: Int?
 		let maxLength: Int?
 		let allowedCharacters: [Character]?
-		let requiredCharacters: [Set<Character>]?
+		let requiredCharacters: [CharacterSet]?
 		let repeatedCharacterLimit: Int?
 		let consecutiveCharacterLimit: Int?
 	}
 	
 	private enum PasswordGenerationStyle {
-		case classic(dashes: Bool, numberOfRequiredRandomCharacters: Int, allowedCharacters: [Character], requiredCharacterSets: [Set<Character>])
+		case classic(dashes: Bool, numberOfRequiredRandomCharacters: Int, allowedCharacters: [Character], requiredCharacterSets: [CharacterSet])
 		case moreTypeable(dashes: Bool)
 	}
 	
+	private typealias CharacterCollection = Collection<Character>
 	
-	func randomNumberWithUniformDistribution(range: Int) -> Int {
+	
+	private func randomNumberWithUniformDistribution(range: Int) -> Int {
 		Int.random(in: 0..<range)
 	}
 	
-	func randomCharacter(in array: [Character]) -> [Character] {
-		let index = randomNumberWithUniformDistribution(range: array.count)
-		return [array[index]]
+	private func randomCharacter<C: CharacterCollection>(in collection: C) -> [Character] {
+		let offset = randomNumberWithUniformDistribution(range: collection.count)
+		var index = collection.startIndex
+		collection.formIndex(&index, offsetBy: offset)
+		return [collection[index]]
 	}
 	
-	func randomConsonant() -> [Character] {
+	private func randomConsonant() -> [Character] {
 		randomCharacter(in: Self.defaultAllowedLowercaseConsonants)
 	}
 	
-	func randomVowel() -> [Character] {
+	private func randomVowel() -> [Character] {
 		randomCharacter(in: Self.defaultAllowedLowercaseVowels)
 	}
 	
-	func randomNumber() -> [Character] {
+	private func randomNumber() -> [Character] {
 		randomCharacter(in: Self.defaultAllowedNumbers)
 	}
 	
-	func randomSyllable() -> [Character] {
+	private func randomSyllable() -> [Character] {
 		randomConsonant() + randomVowel() + randomConsonant()
 	}
+	
 	
 	private func moreTypeablePassword() -> [Character] {
 		var password = randomSyllable() + randomSyllable() + randomSyllable() + randomSyllable() + randomSyllable() + randomConsonant() + randomVowel()
@@ -179,7 +207,7 @@ struct Generator {
 		return longestRepeatedCharLength <= repeatedCharLimit
 	}
 	
-	private func passwordContainsRequiredCharacters(password: [Character], requiredCharacterSets: [Set<Character>]) -> Bool {
+	private func passwordContainsRequiredCharacters(password: [Character], requiredCharacterSets: [CharacterSet]) -> Bool {
 		for requiredCharacterSet in requiredCharacterSets {
 			var hasRequiredChar = false
 			for char in password {
@@ -213,7 +241,7 @@ struct Generator {
 		return false
 	}
 	
-	private func canUseMoreTypeablePasswordFromRequirements(minPasswordLength: Int?, maxPasswordLength: Int?, allowedCharacters: [Character]?, requiredCharacterSets: [Set<Character>]) -> Bool {
+	private func canUseMoreTypeablePasswordFromRequirements(minPasswordLength: Int?, maxPasswordLength: Int?, allowedCharacters: [Character]?, requiredCharacterSets: [CharacterSet]) -> Bool {
 		// MARK: Original code doesn't check for existance of minPasswordLength here but in JS the condition is false if minPasswordLength is undefined.
 		if let minPasswordLength, minPasswordLength > Self.defaultMoreTypeablePasswordLength {
 			return false
@@ -273,9 +301,9 @@ struct Generator {
 		
 		var allowedCharacters = requirements.allowedCharacters
 		
-		var requiredCharacterSets: [Set<Character>] = Self.defaultRequiredCharacterSets
+		var requiredCharacterSets: [CharacterSet] = Self.defaultRequiredCharacterSets
 		if let requiredCharacterArray = requirements.requiredCharacters {
-			var mutatedRequiredCharacterSets = [Set<Character>]()
+			var mutatedRequiredCharacterSets = [CharacterSet]()
 			for requiredCharacters in requiredCharacterArray {
 				// MARK: Original code doesn't check for existance of allowedCharacters here. But the requirements are usually generated to contain all required chars as allowed chars, so the solution below is equivalent to that case.
 				if allowedCharacters == nil || stringsHaveAtLeastOneCommonCharacter(string1: requiredCharacters, string2: allowedCharacters!) {
@@ -314,7 +342,7 @@ struct Generator {
 				dashes = false
 			}
 		} else {
-			allowedCharacters = Self.defaultUnambiguousCharacters
+			allowedCharacters = Array(Self.defaultUnambiguousCharacters)
 		}
 		
 		// In default password format, we use dashes only as separators, not as symbols you can encounter at a random position.
@@ -331,7 +359,7 @@ struct Generator {
 		
 		// MARK: Original code doesn't check for existance of requiredCharacterSets here and also crashes if the above case is met (allowedCharacters is non-nil at this point).
 		// Do not require any character sets that do not contain allowed characters.
-		var mutatedRequiredCharacterSets = [Set<Character>]()
+		var mutatedRequiredCharacterSets = [CharacterSet]()
 		for requiredCharacterSet in requiredCharacterSets {
 			var requiredCharacterSetContainsAllowedCharacters = false
 			for character in allowedCharacters! {
