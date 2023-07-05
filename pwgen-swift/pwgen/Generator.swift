@@ -3,7 +3,8 @@
 //  pwgen
 //
 //  Created by Max-Joseph on 01.07.23.
-//  Ported from JavaScript code at https://developer.apple.com/password-rules/scripts/generator.js
+//  Originally ported from JavaScript code at https://developer.apple.com/password-rules/scripts/generator.js
+//  but modified to be more robust and versatile.
 //
 
 import Foundation
@@ -22,10 +23,13 @@ extension Generator.CharacterSet {
 	
 	static let ascii = Self(joined: .lower, .upper, .digit, .special)
 	static let alphanumeric = Self(joined: .lower, .upper, .digit)
-	static let unambiguous = Self.alphanumeric.subtracting(["l", "O"])
 	
-	static let lowerConsonants = Self("bcdfghjkmnpqrstvwxz")
-	static let lowerVowels = Self("aeiouy")
+	private static let ambiguous = Self("lO")
+	static let unambiguous = Self.alphanumeric.subtracting(ambiguous)
+	static let unambiguousLowerConsonants = Self("bcdfghjklmnpqrstvwxz").subtracting(ambiguous)
+	static let unambiguousUpperConsonants = Self("BCDFGHJKLMNPQRSTVWXZ").subtracting(ambiguous)
+	static let unambiguousLowerVowels = Self("aeiouy").subtracting(ambiguous)
+	static let unambiguousUpperVowels = Self("AEIOUY").subtracting(ambiguous)
 	
 	private init(joined elements: Self...) {
 		self.init(uncheckedUniqueElements: elements.joined())
@@ -42,8 +46,8 @@ struct Generator {
 	static let defaultNumberOfCharactersForMoreTypeablePassword = 18
 	static let defaultMoreTypeablePasswordLength = 20
 	static let defaultAllowedNumbers = CharacterSet.digit
-	static let defaultAllowedLowercaseConsonants = CharacterSet.lowerConsonants
-	static let defaultAllowedLowercaseVowels = CharacterSet.lowerVowels
+	static let defaultAllowedLowercaseConsonants = CharacterSet.unambiguousLowerConsonants
+	static let defaultAllowedLowercaseVowels = CharacterSet.unambiguousLowerVowels
 	
 	private static let lowercaseCharacterSet = CharacterSet.lower
 	private static let uppercaseCharacterSet = CharacterSet.upper
@@ -68,70 +72,103 @@ struct Generator {
 	private typealias CharacterCollection = Collection<Character>
 	
 	
-	private func randomNumberWithUniformDistribution(range: Int) -> Int {
-		Int.random(in: 0..<range)
+	private func randomInt(max: Int) -> Int {
+		Int.random(in: 0..<max)
+	}
+	private func randomInt(range: Range<Int>) -> Int {
+		Int.random(in: range)
+	}
+	private func randomInt(range: ClosedRange<Int>) -> Int {
+		Int.random(in: range)
+	}
+	private func randomBool() -> Bool {
+		Bool.random()
 	}
 	
-	private func randomCharacter<C: CharacterCollection>(in collection: C) -> [Character] {
-		let offset = randomNumberWithUniformDistribution(range: collection.count)
-		var index = collection.startIndex
-		collection.formIndex(&index, offsetBy: offset)
-		return [collection[index]]
+	private func randomPermutation<T>(of collection: inout [T]) {
+		collection.shuffle()
+	}
+	
+	private func randomCharacter<C: CharacterCollection>(in collection: C) -> Character {
+		collection.randomElement()!
 	}
 	
 	private func randomConsonant() -> [Character] {
-		randomCharacter(in: Self.defaultAllowedLowercaseConsonants)
+		[randomCharacter(in: Self.defaultAllowedLowercaseConsonants)]
 	}
 	
 	private func randomVowel() -> [Character] {
-		randomCharacter(in: Self.defaultAllowedLowercaseVowels)
+		[randomCharacter(in: Self.defaultAllowedLowercaseVowels)]
 	}
 	
-	private func randomNumber() -> [Character] {
-		randomCharacter(in: Self.defaultAllowedNumbers)
+	private func randomDigit() -> [Character] {
+		[randomCharacter(in: Self.defaultAllowedNumbers)]
 	}
 	
 	private func randomSyllable() -> [Character] {
 		randomConsonant() + randomVowel() + randomConsonant()
 	}
 	
+	private func randomWord() -> [Character] {
+		randomSyllable() + randomSyllable()
+	}
 	
-	private func moreTypeablePassword() -> [Character] {
-		var password = randomSyllable() + randomSyllable() + randomSyllable() + randomSyllable() + randomSyllable() + randomConsonant() + randomVowel()
+	
+	private func moreTypeablePassword(numberOfMinimumCharacters: Int = defaultNumberOfCharactersForMoreTypeablePassword) -> [Character] {
+		var components = [[Character]]()
+		
+		// Generate enough words to satisfy minimum number of characters
+		let wordLength = 6
+		let numberOfNeededCharacters = max(numberOfMinimumCharacters - wordLength, 0)
+		let numberOfAdditionalWords = (numberOfNeededCharacters + wordLength - 1) / wordLength
+		for _ in 0..<numberOfAdditionalWords {
+			components.append(randomWord())
+		}
+		
+		// Password always includes one word starting or ending with a digit
+		var digitWord = randomSyllable() + randomConsonant() + randomVowel()
+		
+		// Insert digit word while ensuring that password doesn't start with a digit
+		let digitPosition = randomInt(range: 1...(numberOfAdditionalWords*2 + 1))
+		let digitIndex = (digitPosition & 0b1 == 0) ? digitWord.startIndex : digitWord.endIndex
+		let digitWordIndex = digitPosition / 2
+		digitWord.insert(contentsOf: randomDigit(), at: digitIndex)
+		components.insert(digitWord, at: digitWordIndex)
+		
+		// Uppercase a random character that is not an "o" or a digit
+		var password = Array(components.joined())
 		let length = password.count
 		while true {
-			let index = randomNumberWithUniformDistribution(range: length)
+			let index = randomInt(max: length)
 			let lowercaseChar = password[index]
-			if lowercaseChar == "o" {
+			if lowercaseChar == "o" || CharacterSet.digit.contains(lowercaseChar) {
 				continue
 			}
 			
 			let uppercaseChars = lowercaseChar.uppercased()
 			password.replaceSubrange(index...index, with: uppercaseChars)
 			
-			let numberPos = randomNumberWithUniformDistribution(range: 5)
-			let passwordSegment1 = password[0..<6]
-			let passwordSegment2 = password[6..<12]
-			let passwordSegment3 = password[12...]
-			switch numberPos {
-				case 0: return passwordSegment3 + randomNumber() + passwordSegment1 + passwordSegment2
-				case 1: return passwordSegment1 + randomNumber() + passwordSegment3 + passwordSegment2
-				case 2: return passwordSegment1 + passwordSegment3 + randomNumber() + passwordSegment2
-				case 3: return passwordSegment1 + passwordSegment2 + randomNumber() + passwordSegment3
-				case 4: return passwordSegment1 + passwordSegment2 + passwordSegment3 + randomNumber()
-				default: fatalError()
-			}
+			return password
 		}
 	}
 	
 	private func classicPassword(numberOfRequiredRandomCharacters: Int, allowedCharacters: [Character]) -> [Character] {
-		let length = allowedCharacters.count
 		var randomCharArray = [Character]()
 		for _ in 0..<numberOfRequiredRandomCharacters {
-			let index = randomNumberWithUniformDistribution(range: length)
-			randomCharArray.append(allowedCharacters[index])
+			randomCharArray.append(randomCharacter(in: allowedCharacters))
 		}
 		return randomCharArray
+	}
+	
+	private func splitPassword(password: [Character], separator: Character, groupSize: Int) -> [Character] {
+		var components: [ArraySlice<Character>] = []
+		var startIndex = password.startIndex
+		while startIndex < password.endIndex {
+			let endIndex = min(startIndex + groupSize, password.endIndex)
+			components.append(password[startIndex..<endIndex])
+			startIndex = endIndex
+		}
+		return Array(components.joined(separator: [separator]))
 	}
 	
 	private func passwordHasNotExceededConsecutiveCharLimit(password: [Character], consecutiveCharLimit: Int) -> Bool {
@@ -402,7 +439,7 @@ struct Generator {
 				case .classic(let dashes, let numberOfRequiredRandomCharacters, let allowedCharacters, let requiredCharacterSets):
 					password = classicPassword(numberOfRequiredRandomCharacters: numberOfRequiredRandomCharacters, allowedCharacters: allowedCharacters)
 					if dashes {
-						password = Array([password[0..<3], password[3..<6], password[6..<9], password[9..<12]].joined(separator: "-"))
+						password = splitPassword(password: password, separator: "-", groupSize: 3)
 					}
 					
 					if !passwordContainsRequiredCharacters(password: password, requiredCharacterSets: requiredCharacterSets) {
@@ -412,7 +449,7 @@ struct Generator {
 				case .moreTypeable(let dashes):
 					password = moreTypeablePassword()
 					if dashes {
-						password = Array([password[0..<6], password[6..<12], password[12..<18]].joined(separator: "-"))
+						password = splitPassword(password: password, separator: "-", groupSize: 6)
 					}
 					
 					if shouldCheckRepeatedCharRequirement && repeatedCharLimit != 1 {
