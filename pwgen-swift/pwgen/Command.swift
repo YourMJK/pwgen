@@ -19,6 +19,6 @@ struct Command: ParsableCommand {
 	}
 	
 	func run() throws {
-		
+		stdout(Generator().generatedPasswordMatchingRequirements(requirements: nil))
 	}
 }
