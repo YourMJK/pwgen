@@ -29,44 +29,27 @@ struct Generator {
 	private typealias CharacterCollection = Collection<Character>
 	
 	struct Requirements {
-		let passwordMinLength: Int?
-		let passwordMaxLength: Int?
-		let passwordAllowedCharacters: [Character]?
-		let passwordRequiredCharacters: [Set<Character>]?
-		let passwordRepeatedCharacterLimit: Int?
-		let passwordConsecutiveCharacterLimit: Int?
+		let minLength: Int?
+		let maxLength: Int?
+		let allowedCharacters: [Character]?
+		let requiredCharacters: [Set<Character>]?
+		let repeatedCharacterLimit: Int?
+		let consecutiveCharacterLimit: Int?
 	}
 	
 	private enum PasswordGenerationStyle {
-		case classic
-		case classicWithoutDashes
-		case moreTypeable
-		case moreTypeableWithoutDashes
+		case classic(dashes: Bool, numberOfRequiredRandomCharacters: Int, allowedCharacters: [Character], requiredCharacterSets: [Set<Character>])
+		case moreTypeable(dashes: Bool)
 	}
 	
-	private struct PasswordGenerationParameters {
-		let passwordGenerationStyle: PasswordGenerationStyle
-		let numberOfRequiredRandomCharacters: Int?
-		let passwordAllowedCharacters: [Character]?
-		let requiredCharacterSets: [Set<Character>]?
-	}
 	
 	func randomNumberWithUniformDistribution(range: Int) -> Int {
-		// Based on the algorithn described in https://pthree.org/2018/06/13/why-the-multiply-and-floor-rng-method-is-biased/
-		let range = UInt64(range)
-		let max = (UInt64(1 << 32) / range) * range;
-		var x: UInt64
-		var srng = SystemRandomNumberGenerator()
-		repeat {
-			x = srng.next() & UInt64(UInt32.max)  // Get random 32 bit value
-		} while (x >= max);
-		
-		return Int(x % range);
+		Int.random(in: 0..<range)
 	}
 	
 	func randomCharacter(in array: [Character]) -> [Character] {
-		let index = randomNumberWithUniformDistribution(range: array.count);
-		return [array[index]];
+		let index = randomNumberWithUniformDistribution(range: array.count)
+		return [array[index]]
 	}
 	
 	func randomConsonant() -> [Character] {
@@ -266,7 +249,7 @@ struct Generator {
 			return false
 		}
 		
-		let defaultUnambiguousCharactersPlusDash = Self.defaultUnambiguousCharacters + "-";
+		let defaultUnambiguousCharactersPlusDash = Self.defaultUnambiguousCharacters + "-"
 		for requiredCharacterSet in requiredCharacterSets {
 			if !stringsHaveAtLeastOneCommonCharacter(string1: requiredCharacterSet, string2: defaultUnambiguousCharactersPlusDash) {
 				return false
@@ -276,9 +259,9 @@ struct Generator {
 		return true
 	}
 	
-	private func passwordGenerationParameters(requirements: Requirements) -> PasswordGenerationParameters {
-		var minPasswordLength = requirements.passwordMinLength
-		let maxPasswordLength = requirements.passwordMaxLength
+	private func passwordGenerationStyle(requirements: Requirements) -> PasswordGenerationStyle {
+		var minPasswordLength = requirements.minLength
+		let maxPasswordLength = requirements.maxLength
 		
 		// MARK: Original code doesn't check for existance of minPasswordLength and maxPasswordLength here but in JS the condition is false if either is undefined.
 		if let min = minPasswordLength, let max = maxPasswordLength {
@@ -288,10 +271,10 @@ struct Generator {
 			}
 		}
 		
-		var allowedCharacters = requirements.passwordAllowedCharacters
+		var allowedCharacters = requirements.allowedCharacters
 		
-		var requiredCharacterSets: [Set<Character>]? = Self.defaultRequiredCharacterSets
-		if let requiredCharacterArray = requirements.passwordRequiredCharacters {
+		var requiredCharacterSets: [Set<Character>] = Self.defaultRequiredCharacterSets
+		if let requiredCharacterArray = requirements.requiredCharacters {
 			var mutatedRequiredCharacterSets = [Set<Character>]()
 			for requiredCharacters in requiredCharacterArray {
 				// MARK: Original code doesn't check for existance of allowedCharacters here. But the requirements are usually generated to contain all required chars as allowed chars, so the solution below is equivalent to that case.
@@ -306,65 +289,50 @@ struct Generator {
 			minPasswordLength: minPasswordLength,
 			maxPasswordLength: maxPasswordLength,
 			allowedCharacters: allowedCharacters,
-			requiredCharacterSets: requiredCharacterSets!
+			requiredCharacterSets: requiredCharacterSets
 		)
 		if canUseMoreTypeablePassword {
-			var style: PasswordGenerationStyle = .moreTypeable
-			if let allowedCharacters, !allowedCharacters.contains("-") {
-				style = .moreTypeableWithoutDashes
-			}
-			
-			return PasswordGenerationParameters(
-				passwordGenerationStyle: style,
-				numberOfRequiredRandomCharacters: nil,
-				passwordAllowedCharacters: nil,
-				requiredCharacterSets: nil
-			)
+			return .moreTypeable(dashes: allowedCharacters?.contains("-") ?? true)
 		}
 		
 		// If requirements allow, we will generate the password in default format: "xxx-xxx-xxx-xxx".
-		var style: PasswordGenerationStyle = .classic
+		var dashes = true
 		var numberOfRequiredRandomCharacters = Self.defaultNumberOfCharactersForClassicPassword
 		if let minPasswordLength, minPasswordLength > Self.defaultClassicPasswordLength {
-			style = .classicWithoutDashes
+			dashes = false
 			numberOfRequiredRandomCharacters = minPasswordLength
 		}
 		
 		if let maxPasswordLength, maxPasswordLength < Self.defaultClassicPasswordLength {
-			style = .classicWithoutDashes
+			dashes = false
 			numberOfRequiredRandomCharacters = maxPasswordLength
 		}
 		
 		if let allowedCharacters {
 			// We cannot use default format if dash is not an allowed character in the password.
 			if !allowedCharacters.contains("-") {
-				style = .classicWithoutDashes
+				dashes = false
 			}
 		} else {
 			allowedCharacters = Self.defaultUnambiguousCharacters
 		}
 		
 		// In default password format, we use dashes only as separators, not as symbols you can encounter at a random position.
-		if style == .classic {
+		if dashes {
 			allowedCharacters?.removeAll { $0 == "-" }
 		}
-		
-		// MARK: Original code is redundant, requiredCharacterSets is already set to Self.defaultRequiredCharacterSets if requirements.passwordRequiredCharacters was undefined.
-//		if requiredCharacterSets == nil {
-//			requiredCharacterSets = Self.defaultRequiredCharacterSets
-//		}
 		
 		// If we have more requirements of the type "need a character from set" than the length of the password we want to generate, then
 		// we will never be able to meet these requirements, and we'll end up in an infinite loop generating passwords. To avoid this,
 		// reset required character sets if the requirements are impossible to meet.
-		if let length = requiredCharacterSets?.count, length > numberOfRequiredRandomCharacters {
-			requiredCharacterSets = nil
+		if requiredCharacterSets.count > numberOfRequiredRandomCharacters {
+			preconditionFailure("Unable to meet requirements: More required character sets specified than number of password characters to generate")
 		}
 		
-		// MARK: Original code doesn't check for existance of requiredCharacterSets here and crashes if the above case is met (allowedCharacters is non-nil at this point).
+		// MARK: Original code doesn't check for existance of requiredCharacterSets here and also crashes if the above case is met (allowedCharacters is non-nil at this point).
 		// Do not require any character sets that do not contain allowed characters.
 		var mutatedRequiredCharacterSets = [Set<Character>]()
-		for requiredCharacterSet in requiredCharacterSets ?? [] {
+		for requiredCharacterSet in requiredCharacterSets {
 			var requiredCharacterSetContainsAllowedCharacters = false
 			for character in allowedCharacters! {
 				if requiredCharacterSet.contains(character) {
@@ -378,49 +346,44 @@ struct Generator {
 		}
 		requiredCharacterSets = mutatedRequiredCharacterSets
 		
-		return PasswordGenerationParameters(
-			passwordGenerationStyle: style,
+		return .classic(
+			dashes: dashes,
 			numberOfRequiredRandomCharacters: numberOfRequiredRandomCharacters,
-			passwordAllowedCharacters: allowedCharacters,
+			allowedCharacters: allowedCharacters!,
 			requiredCharacterSets: requiredCharacterSets
 		)
 	}
 	
 	func generatedPasswordMatchingRequirements(requirements: Requirements?) -> String {
 		let requirements = requirements ?? Requirements(
-			passwordMinLength: nil,
-			passwordMaxLength: nil,
-			passwordAllowedCharacters: nil,
-			passwordRequiredCharacters: nil,
-			passwordRepeatedCharacterLimit: nil,
-			passwordConsecutiveCharacterLimit: nil
+			minLength: nil,
+			maxLength: nil,
+			allowedCharacters: nil,
+			requiredCharacters: nil,
+			repeatedCharacterLimit: nil,
+			consecutiveCharacterLimit: nil
 		)
 		
-		let parameters = passwordGenerationParameters(requirements: requirements)
-		let style = parameters.passwordGenerationStyle
-		let numberOfRequiredRandomCharacters = parameters.numberOfRequiredRandomCharacters
-		let repeatedCharLimit = requirements.passwordRepeatedCharacterLimit
-		let allowedCharacters = parameters.passwordAllowedCharacters
+		let style = passwordGenerationStyle(requirements: requirements)
+		let repeatedCharLimit = requirements.repeatedCharacterLimit
 		var shouldCheckRepeatedCharRequirement = repeatedCharLimit != nil
 		
 		while true {
 			var password = [Character]()
 			switch style {
-				case .classic: fallthrough
-				case .classicWithoutDashes:
-					password = classicPassword(numberOfRequiredRandomCharacters: numberOfRequiredRandomCharacters!, allowedCharacters: allowedCharacters!)
-					if style == .classic {
+				case .classic(let dashes, let numberOfRequiredRandomCharacters, let allowedCharacters, let requiredCharacterSets):
+					password = classicPassword(numberOfRequiredRandomCharacters: numberOfRequiredRandomCharacters, allowedCharacters: allowedCharacters)
+					if dashes {
 						password = Array([password[0..<3], password[3..<6], password[6..<9], password[9..<12]].joined(separator: "-"))
 					}
 					
-					if !passwordContainsRequiredCharacters(password: password, requiredCharacterSets: parameters.requiredCharacterSets!) {
+					if !passwordContainsRequiredCharacters(password: password, requiredCharacterSets: requiredCharacterSets) {
 						continue
 					}
 					
-				case .moreTypeable: fallthrough
-				case .moreTypeableWithoutDashes:
+				case .moreTypeable(let dashes):
 					password = moreTypeablePassword()
-					if style == .moreTypeable {
+					if dashes {
 						password = Array([password[0..<6], password[6..<12], password[12..<18]].joined(separator: "-"))
 					}
 					
@@ -435,7 +398,7 @@ struct Generator {
 				}
 			}
 			
-			if let consecutiveCharLimit = requirements.passwordConsecutiveCharacterLimit {
+			if let consecutiveCharLimit = requirements.consecutiveCharacterLimit {
 				if consecutiveCharLimit >= 1 && passwordHasNotExceededConsecutiveCharLimit(password: password, consecutiveCharLimit: consecutiveCharLimit) {
 					continue
 				}
