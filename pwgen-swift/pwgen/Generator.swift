@@ -458,13 +458,13 @@ struct Generator {
 			}
 			
 			if shouldCheckRepeatedCharRequirement, let repeatedCharLimit {
-				if repeatedCharLimit >= 1 && passwordHasNotExceededRepeatedCharLimit(password: password, repeatedCharLimit: repeatedCharLimit) {
+				if repeatedCharLimit >= 1 && !passwordHasNotExceededRepeatedCharLimit(password: password, repeatedCharLimit: repeatedCharLimit) {
 					continue
 				}
 			}
 			
 			if let consecutiveCharLimit = requirements.consecutiveCharacterLimit {
-				if consecutiveCharLimit >= 1 && passwordHasNotExceededConsecutiveCharLimit(password: password, consecutiveCharLimit: consecutiveCharLimit) {
+				if consecutiveCharLimit >= 1 && !passwordHasNotExceededConsecutiveCharLimit(password: password, consecutiveCharLimit: consecutiveCharLimit) {
 					continue
 				}
 			}
