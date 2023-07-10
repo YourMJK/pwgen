@@ -148,26 +148,27 @@ struct Generator {
 		return randomCharArray
 	}
 	
-	private func splitPassword(password: [Character], separator: Character, groupSize: Int) -> [Character] {
-		var components: [ArraySlice<Character>] = []
-		var startIndex = password.startIndex
-		while startIndex < password.endIndex {
-			let endIndex = min(startIndex + groupSize, password.endIndex)
-			components.append(password[startIndex..<endIndex])
+	private func splitArray<T>(_ array: [T], separator: T, groupSize: Int) -> [T] {
+		var components: [ArraySlice<T>] = []
+		var startIndex = array.startIndex
+		while startIndex < array.endIndex {
+			let endIndex = min(startIndex + groupSize, array.endIndex)
+			components.append(array[startIndex..<endIndex])
 			startIndex = endIndex
 		}
 		return Array(components.joined(separator: [separator]))
 	}
 	
+	
 	private func passwordHasNotExceededConsecutiveCharLimit(password: [Character], consecutiveCharLimit: Int) -> Bool {
-		let passwordUnicodeScalars = password.flatMap(\.unicodeScalars).map(\.value)
+		let passwordUnicodeScalars = password.flatMap(\.unicodeScalars)
 		var longestConsecutiveCharLength = 1
 		var firstConsecutiveCharIndex = 0
 		// Both "123" or "abc" and "321" or "cba" are considered consecutive.
 		var isSequenceAscending: Bool?
 		for i in 1..<passwordUnicodeScalars.count {
-			let currCharCode = passwordUnicodeScalars[i]
-			let prevCharCode = passwordUnicodeScalars[i-1]
+			let currCharCode = passwordUnicodeScalars[i].value
+			let prevCharCode = passwordUnicodeScalars[i-1].value
 			if let _isSequenceAscending = isSequenceAscending {
 				// If `isSequenceAscending` is not nil, then we know that we are in the middle of an existing
 				// pattern. Check if the pattern continues based on whether the previous pattern was
@@ -300,7 +301,7 @@ struct Generator {
 				case .random:
 					password = classicPassword(numberOfRandomCharacters: numberOfCharacters, from: characterPool)
 					if split {
-						password = splitPassword(password: password, separator: separator, groupSize: groupSize)
+						password = splitArray(password, separator: separator, groupSize: groupSize)
 					}
 					
 					if !passwordContainsRequiredCharacters(password: password, requiredCharacterSets: requiredCharacterSets) {
@@ -310,7 +311,7 @@ struct Generator {
 				case .nice:
 					password = moreTypeablePassword(numberOfMinimumCharacters: numberOfCharacters)
 					if split {
-						password = splitPassword(password: password, separator: separator, groupSize: groupSize)
+						password = splitArray(password, separator: separator, groupSize: groupSize)
 					}
 					
 					if repeatedCharLimit != 1 {
