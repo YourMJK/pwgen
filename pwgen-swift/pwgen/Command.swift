@@ -19,6 +19,8 @@ struct Command: ParsableCommand {
 	}
 	
 	func run() throws {
-		stdout(Generator().generatedPasswordMatchingRequirements(requirements: nil))
+		let config = Generator.Configuration(style: .nice, minLength: 18, grouped: true)
+		let generator = Generator()
+		stdout(generator.generatePassword(configuration: config))
 	}
 }
