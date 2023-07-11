@@ -1,5 +1,5 @@
 //
-//  Generator.CharacterSet.swift
+//  PasswordGenerator.CharacterSet.swift
 //  pwgen
 //
 //  Created by Max-Joseph on 10.07.23.
@@ -8,11 +8,11 @@
 import OrderedCollections
 
 
-extension Generator {
+extension PasswordGenerator {
 	typealias CharacterSet = OrderedSet<Character>
 }
 
-extension Generator.CharacterSet {
+extension PasswordGenerator.CharacterSet {
 	static let lower = Self("abcdefghijklmnopqrstuvwxyz")
 	static let upper = Self("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	static let digit = Self("0123456789")

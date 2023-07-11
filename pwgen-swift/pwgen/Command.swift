@@ -19,7 +19,7 @@ struct Command: ParsableCommand {
 	}
 	
 	func run() throws {
-		let generator = Generator(style: .nice, minLength: 18, grouped: true)
+		let generator = PasswordGenerator(style: .nice, minLength: 18, grouped: true)
 		stdout(generator.newPassword())
 	}
 }

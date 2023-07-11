@@ -1,5 +1,5 @@
 //
-//  Generator.swift
+//  PasswordGenerator.swift
 //  pwgen
 //
 //  Created by Max-Joseph on 01.07.23.
@@ -10,7 +10,7 @@
 import Foundation
 
 
-struct Generator {
+struct PasswordGenerator {
 	enum Style {
 		case random
 		case nice
