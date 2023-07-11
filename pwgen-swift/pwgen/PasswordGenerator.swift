@@ -4,7 +4,7 @@
 //
 //  Created by Max-Joseph on 01.07.23.
 //  Originally ported from JavaScript code at https://developer.apple.com/password-rules/scripts/generator.js
-//  but modified to be more robust and versatile.
+//  but modified to be simpler, more robust and versatile.
 //
 
 import Foundation
@@ -70,23 +70,41 @@ struct PasswordGenerator {
 		requiredCharacterSets = requiredCharacterSets
 			.map { $0.intersection(allowedCharacters) }
 			.filter { !$0.isEmpty }
+		// Set up character sets for generator to randomly choose from
 		let characterPool = CharacterSet(union: requiredCharacterSets)
+		let lowerConsonants: CharacterSet = .lowerConsonants.intersection(allowedCharacters)
+		let upperConsonants: CharacterSet = .upperConsonants.intersection(allowedCharacters)
+		let lowerVowels: CharacterSet = .lowerVowels.intersection(allowedCharacters)
+		let upperVowels: CharacterSet = .upperVowels.intersection(allowedCharacters)
+		let digits: CharacterSet = .digit.intersection(allowedCharacters)
 		
-		// If we have more requirements of the type "need a character from set" than the length of the password we want to generate, then
-		// we will never be able to meet these requirements, and we'll end up in an infinite loop generating passwords. To avoid this,
-		// reset required character sets if the requirements are impossible to meet.
-		precondition(requiredCharacterSets.count <= numberOfCharacters, "Unable to meet requirements: More required character sets (\(requiredCharacterSets.count)) specified than number of password characters (\(numberOfCharacters)) to generate")
-		
-		self.passwordFunction = {
-			switch style {
-				case .random: return {
+		switch style {
+			case .random:
+				// If we have more requirements of the type "need a character from set" than the length of the password we want to generate, then
+				// we will never be able to meet these requirements, and we'll end up in an infinite loop generating passwords.
+				precondition(requiredCharacterSets.count <= numberOfCharacters, "Unable to meet requirements: More required character sets (\(requiredCharacterSets.count)) specified than number of password characters (\(numberOfCharacters)) to generate")
+				
+				self.passwordFunction = {
 					Self.classicPassword(numberOfRandomCharacters: numberOfCharacters, from: characterPool)
 				}
-				case .nice: return {
-					Self.moreTypeablePassword(numberOfMinimumCharacters: numberOfCharacters)
+			case .nice:
+				// If the requirements don't allow at least one character of each of these types, we can't generate a moreTypeablePassword.
+				[lowerConsonants, upperConsonants, lowerVowels, upperVowels, digits].forEach {
+					precondition(!$0.isEmpty, "Unable to meet requirements: For a password of style \"nice\", allowed characters must contain a lowercase and uppercase consonant and vowel and a digit")
 				}
-			}
-		}()
+				
+				self.passwordFunction = {
+					Self.moreTypeablePassword(
+						numberOfMinimumCharacters: numberOfCharacters,
+						lowerConsonants: lowerConsonants,
+						upperConsonants: upperConsonants,
+						lowerVowels: lowerVowels,
+						upperVowels: upperVowels,
+						digits: digits
+					)
+				}
+		}
+		
 		self.group = split ? (groupSize, groupSeparator) : nil
 		self.requiredCharacterSets = style == .random ? requiredCharacterSets : nil
 		self.repeatedCharacterLimit = {
@@ -138,33 +156,35 @@ struct PasswordGenerator {
 	private static func randomInt(range: ClosedRange<Int>) -> Int {
 		Int.random(in: range)
 	}
-	
 	private static func randomCharacter<C: CharacterCollection>(in collection: C) -> Character {
 		collection.randomElement()!
 	}
 	
-	private static func randomConsonant() -> [Character] {
-		[randomCharacter(in: CharacterSet.unambiguousLowerConsonants)]
-	}
 	
-	private static func randomVowel() -> [Character] {
-		[randomCharacter(in: CharacterSet.unambiguousLowerVowels)]
-	}
-	
-	private static func randomDigit() -> [Character] {
-		[randomCharacter(in: CharacterSet.digit)]
-	}
-	
-	private static func randomSyllable() -> [Character] {
-		randomConsonant() + randomVowel() + randomConsonant()
-	}
-	
-	private static func randomWord() -> [Character] {
-		randomSyllable() + randomSyllable()
-	}
-	
-	
-	private static func moreTypeablePassword(numberOfMinimumCharacters: Int) -> [Character] {
+	private static func moreTypeablePassword(
+		numberOfMinimumCharacters: Int,
+		lowerConsonants: CharacterSet,
+		upperConsonants: CharacterSet,
+		lowerVowels: CharacterSet,
+		upperVowels: CharacterSet,
+		digits: CharacterSet
+	) -> [Character] {
+		func randomConsonant() -> [Character] {
+			[randomCharacter(in: lowerConsonants)]
+		}
+		func randomVowel() -> [Character] {
+			[randomCharacter(in: lowerVowels)]
+		}
+		func randomDigit() -> [Character] {
+			[randomCharacter(in: digits)]
+		}
+		func randomSyllable() -> [Character] {
+			randomConsonant() + randomVowel() + randomConsonant()
+		}
+		func randomWord() -> [Character] {
+			randomSyllable() + randomSyllable()
+		}
+		
 		var components = [[Character]]()
 		
 		// Generate enough words to satisfy minimum number of characters
@@ -185,18 +205,21 @@ struct PasswordGenerator {
 		digitWord.insert(contentsOf: randomDigit(), at: digitIndex)
 		components.insert(digitWord, at: digitWordIndex)
 		
-		// Uppercase a random character that is not an "o" or a digit
+		// Uppercase a random consonant or vowel
 		var password = Array(components.joined())
 		let length = password.count
 		while true {
 			let index = randomInt(max: length)
 			let lowercaseChar = password[index]
-			if lowercaseChar == "o" || CharacterSet.digit.contains(lowercaseChar) {
+			let uppercaseChar: Character
+			if lowerConsonants.contains(lowercaseChar) {
+				uppercaseChar = randomCharacter(in: upperConsonants)
+			} else if lowerVowels.contains(lowercaseChar) {
+				uppercaseChar = randomCharacter(in: upperVowels)
+			} else {
 				continue
 			}
-			
-			let uppercaseChars = lowercaseChar.uppercased()
-			password.replaceSubrange(index...index, with: uppercaseChars)
+			password[index] = uppercaseChar
 			
 			return password
 		}

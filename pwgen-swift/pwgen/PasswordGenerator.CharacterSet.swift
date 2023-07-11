@@ -20,13 +20,12 @@ extension PasswordGenerator.CharacterSet {
 	
 	static let ascii = Self(joined: .lower, .upper, .digit, .special)
 	static let alphanumeric = Self(joined: .lower, .upper, .digit)
+	static let unambiguous = Self.ascii.subtracting("lO")
 	
-	private static let ambiguous = Self("lO")
-	static let unambiguous = Self.ascii.subtracting(ambiguous)
-	static let unambiguousLowerConsonants = Self("bcdfghjklmnpqrstvwxz").subtracting(ambiguous)
-	static let unambiguousUpperConsonants = Self("BCDFGHJKLMNPQRSTVWXZ").subtracting(ambiguous)
-	static let unambiguousLowerVowels = Self("aeiouy").subtracting(ambiguous)
-	static let unambiguousUpperVowels = Self("AEIOUY").subtracting(ambiguous)
+	static let lowerVowels = Self("aeiouy")
+	static let upperVowels = Self("AEIOUY")
+	static let lowerConsonants = Self.lower.subtracting(lowerVowels)
+	static let upperConsonants = Self.upper.subtracting(upperVowels)
 	
 	
 	private init(joined elements: Self...) {
