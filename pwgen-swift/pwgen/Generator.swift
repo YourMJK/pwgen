@@ -16,18 +16,81 @@ struct Generator {
 		case nice
 	}
 	
-	struct Configuration {
-		var style: Style
-		var minLength: Int
-		var grouped: Bool
-		var groupSeparator: Character = "-"
-		var allowedCharacters: CharacterSet = .unambiguous
-		var requiredCharacterSets: [CharacterSet] = [.lower, .upper, .digit]
-		var repeatedCharacterLimit: Int?
-		var consecutiveCharacterLimit: Int?
-	}
-	
 	private typealias CharacterCollection = Collection<Character>
+	
+	
+	static let defaultGroupSeparator: Character = "-"
+	static let defaultAllowedCharacters: CharacterSet = .unambiguous
+	static let defaultRequiredCharacterSets: [CharacterSet] = [.lower, .upper, .digit]
+	
+	private let style: Style
+	private let numberOfCharacters: Int
+	private let group: (size: Int, separator: Character)?
+	private let characterPool: CharacterSet
+	private let requiredCharacterSets: [CharacterSet]
+	private let repeatedCharacterLimit: Int?
+	private let consecutiveCharacterLimit: Int?
+	
+	init(
+		style: Style,
+		minLength: Int,
+		grouped: Bool,
+		groupSeparator: Character = Self.defaultGroupSeparator,
+		allowedCharacters: CharacterSet = Self.defaultAllowedCharacters,
+		requiredCharacterSets: [CharacterSet] = Self.defaultRequiredCharacterSets,
+		repeatedCharacterLimit: Int? = nil,
+		consecutiveCharacterLimit: Int? = nil
+	) {
+		self.style = style
+		self.consecutiveCharacterLimit = consecutiveCharacterLimit
+		self.repeatedCharacterLimit = {
+			if style == .nice && repeatedCharacterLimit != 1 {
+				return nil
+			}
+			return consecutiveCharacterLimit
+		}()
+		
+		// Calculate the number of characters and splits such that the resulting length satisfies the specified minimum length
+		let groupSize = {
+			switch style {
+				case .random: return 3
+				case .nice: return 6
+			}
+		}()
+		var numberOfSplits = 0
+		var numberOfCharacters = groupSize
+		var split = false
+		if grouped {
+			let splitSize = groupSize + 1
+			numberOfSplits = (minLength - numberOfCharacters + splitSize - 1) / splitSize
+			numberOfCharacters += numberOfSplits * groupSize
+			split = numberOfSplits > 0
+		}
+		else {
+			numberOfCharacters = minLength
+		}
+		self.numberOfCharacters = numberOfCharacters
+		self.group = split ? (groupSize, groupSeparator) : nil
+		
+		// For each separator inserted due to splitting, remove a character set that requires the separator character
+		var requiredCharacterSets = requiredCharacterSets
+		requiredCharacterSets.indices
+			.filter { requiredCharacterSets[$0].contains(groupSeparator) }
+			.prefix(numberOfSplits)
+			.reversed()
+			.forEach { requiredCharacterSets.remove(at: $0) }
+		// Remove any required character not present in the allowed characters
+		requiredCharacterSets = requiredCharacterSets
+			.map { $0.intersection(allowedCharacters) }
+			.filter { !$0.isEmpty }
+		self.characterPool = CharacterSet(union: requiredCharacterSets)
+		self.requiredCharacterSets = requiredCharacterSets
+		
+		// If we have more requirements of the type "need a character from set" than the length of the password we want to generate, then
+		// we will never be able to meet these requirements, and we'll end up in an infinite loop generating passwords. To avoid this,
+		// reset required character sets if the requirements are impossible to meet.
+		precondition(requiredCharacterSets.count <= numberOfCharacters, "Unable to meet requirements: More required character sets (\(requiredCharacterSets.count)) specified than number of password characters (\(numberOfCharacters)) to generate")
+	}
 	
 	
 	private func randomInt(max: Int) -> Int {
@@ -213,58 +276,15 @@ struct Generator {
 	}
 	
 	
-	func generatePassword(configuration: Configuration) -> String {
-		let style = configuration.style
-		let separator = configuration.groupSeparator
-		var repeatedCharLimit = configuration.repeatedCharacterLimit
-		let consecutiveCharLimit = configuration.consecutiveCharacterLimit
-		
-		// Calculate the number of characters and splits such that the resulting length satisfies the specified minimum length
-		let groupSize = {
-			switch style {
-				case .random: return 3
-				case .nice: return 6
-			}
-		}()
-		var numberOfSplits = 0
-		var numberOfCharacters = groupSize
-		var split = false
-		if configuration.grouped {
-			let splitSize = groupSize + 1
-			numberOfSplits = (configuration.minLength - numberOfCharacters + splitSize - 1) / splitSize
-			numberOfCharacters += numberOfSplits * groupSize
-			split = numberOfSplits > 0
-		}
-		else {
-			numberOfCharacters = configuration.minLength
-		}
-		
-		// For each separator inserted due to splitting, remove a character set that requires the separator character
-		var requiredCharacterSets = configuration.requiredCharacterSets
-		requiredCharacterSets.indices
-			.filter { requiredCharacterSets[$0].contains(separator) }
-			.prefix(numberOfSplits)
-			.reversed()
-			.forEach { requiredCharacterSets.remove(at: $0) }
-		// Remove any required character not present in the allowed characters
-		requiredCharacterSets = requiredCharacterSets
-			.map { $0.intersection(configuration.allowedCharacters) }
-			.filter { !$0.isEmpty }
-		let characterPool = CharacterSet(union: requiredCharacterSets)
-		
-		// If we have more requirements of the type "need a character from set" than the length of the password we want to generate, then
-		// we will never be able to meet these requirements, and we'll end up in an infinite loop generating passwords. To avoid this,
-		// reset required character sets if the requirements are impossible to meet.
-		precondition(requiredCharacterSets.count <= numberOfCharacters, "Unable to meet requirements: More required character sets (\(requiredCharacterSets.count)) specified than number of password characters (\(numberOfCharacters)) to generate")
-		
+	func generatePassword() -> String {
 		while true {
 			var password = [Character]()
 			
 			switch style {
 				case .random:
 					password = classicPassword(numberOfRandomCharacters: numberOfCharacters, from: characterPool)
-					if split {
-						password = splitArray(password, separator: separator, groupSize: groupSize)
+					if let group {
+						password = splitArray(password, separator: group.separator, groupSize: group.size)
 					}
 					
 					if !passwordContainsRequiredCharacters(password: password, requiredCharacterSets: requiredCharacterSets) {
@@ -273,19 +293,15 @@ struct Generator {
 					
 				case .nice:
 					password = moreTypeablePassword(numberOfMinimumCharacters: numberOfCharacters)
-					if split {
-						password = splitArray(password, separator: separator, groupSize: groupSize)
-					}
-					
-					if repeatedCharLimit != 1 {
-						repeatedCharLimit = nil
+					if let group {
+						password = splitArray(password, separator: group.separator, groupSize: group.size)
 					}
 			}
 			
-			if let repeatedCharLimit, repeatedCharLimit >= 1, !passwordHasNotExceededRepeatedCharLimit(password: password, repeatedCharLimit: repeatedCharLimit) {
+			if let repeatedCharacterLimit, repeatedCharacterLimit >= 1, !passwordHasNotExceededRepeatedCharLimit(password: password, repeatedCharLimit: repeatedCharacterLimit) {
 				continue
 			}
-			if let consecutiveCharLimit, consecutiveCharLimit >= 1, !passwordHasNotExceededConsecutiveCharLimit(password: password, consecutiveCharLimit: consecutiveCharLimit) {
+			if let consecutiveCharacterLimit, consecutiveCharacterLimit >= 1, !passwordHasNotExceededConsecutiveCharLimit(password: password, consecutiveCharLimit: consecutiveCharacterLimit) {
 				continue
 			}
 			
