@@ -23,11 +23,9 @@ struct Generator {
 	static let defaultAllowedCharacters: CharacterSet = .unambiguous
 	static let defaultRequiredCharacterSets: [CharacterSet] = [.lower, .upper, .digit]
 	
-	private let style: Style
-	private let numberOfCharacters: Int
+	private let passwordFunction: () -> [Character]
 	private let group: (size: Int, separator: Character)?
-	private let characterPool: CharacterSet
-	private let requiredCharacterSets: [CharacterSet]
+	private let requiredCharacterSets: [CharacterSet]?
 	private let repeatedCharacterLimit: Int?
 	private let consecutiveCharacterLimit: Int?
 	
@@ -41,15 +39,6 @@ struct Generator {
 		repeatedCharacterLimit: Int? = nil,
 		consecutiveCharacterLimit: Int? = nil
 	) {
-		self.style = style
-		self.consecutiveCharacterLimit = consecutiveCharacterLimit
-		self.repeatedCharacterLimit = {
-			if style == .nice && repeatedCharacterLimit != 1 {
-				return nil
-			}
-			return consecutiveCharacterLimit
-		}()
-		
 		// Calculate the number of characters and splits such that the resulting length satisfies the specified minimum length
 		let groupSize = {
 			switch style {
@@ -69,8 +58,6 @@ struct Generator {
 		else {
 			numberOfCharacters = minLength
 		}
-		self.numberOfCharacters = numberOfCharacters
-		self.group = split ? (groupSize, groupSeparator) : nil
 		
 		// For each separator inserted due to splitting, remove a character set that requires the separator character
 		var requiredCharacterSets = requiredCharacterSets
@@ -83,52 +70,101 @@ struct Generator {
 		requiredCharacterSets = requiredCharacterSets
 			.map { $0.intersection(allowedCharacters) }
 			.filter { !$0.isEmpty }
-		self.characterPool = CharacterSet(union: requiredCharacterSets)
-		self.requiredCharacterSets = requiredCharacterSets
+		let characterPool = CharacterSet(union: requiredCharacterSets)
 		
 		// If we have more requirements of the type "need a character from set" than the length of the password we want to generate, then
 		// we will never be able to meet these requirements, and we'll end up in an infinite loop generating passwords. To avoid this,
 		// reset required character sets if the requirements are impossible to meet.
 		precondition(requiredCharacterSets.count <= numberOfCharacters, "Unable to meet requirements: More required character sets (\(requiredCharacterSets.count)) specified than number of password characters (\(numberOfCharacters)) to generate")
+		
+		self.passwordFunction = {
+			switch style {
+				case .random: return {
+					Self.classicPassword(numberOfRandomCharacters: numberOfCharacters, from: characterPool)
+				}
+				case .nice: return {
+					Self.moreTypeablePassword(numberOfMinimumCharacters: numberOfCharacters)
+				}
+			}
+		}()
+		self.group = split ? (groupSize, groupSeparator) : nil
+		self.requiredCharacterSets = style == .random ? requiredCharacterSets : nil
+		self.repeatedCharacterLimit = {
+			if let repeatedCharacterLimit, repeatedCharacterLimit < 1 {
+				return nil
+			}
+			if style == .nice && repeatedCharacterLimit != 1 {
+				return nil
+			}
+			return repeatedCharacterLimit
+		}()
+		self.consecutiveCharacterLimit = {
+			if let consecutiveCharacterLimit, consecutiveCharacterLimit < 1 {
+				return nil
+			}
+			return consecutiveCharacterLimit
+		}()
 	}
 	
 	
-	private func randomInt(max: Int) -> Int {
+	func newPassword() -> String {
+		while true {
+			var password = passwordFunction()
+			if let group {
+				password = Self.splitArray(password, separator: group.separator, groupSize: group.size)
+			}
+			
+			if let requiredCharacterSets, !Self.passwordContainsRequiredCharacters(password: password, requiredCharacterSets: requiredCharacterSets) {
+				continue
+			}
+			if let repeatedCharacterLimit, !Self.passwordHasNotExceededRepeatedCharacterLimit(password: password, limit: repeatedCharacterLimit) {
+				continue
+			}
+			if let consecutiveCharacterLimit, !Self.passwordHasNotExceededConsecutiveCharacterLimit(password: password, limit: consecutiveCharacterLimit) {
+				continue
+			}
+			
+			return String(password)
+		}
+	}
+	
+	
+	private static func randomInt(max: Int) -> Int {
 		Int.random(in: 0..<max)
 	}
-	private func randomInt(range: Range<Int>) -> Int {
+	private static func randomInt(range: Range<Int>) -> Int {
 		Int.random(in: range)
 	}
-	private func randomInt(range: ClosedRange<Int>) -> Int {
+	private static func randomInt(range: ClosedRange<Int>) -> Int {
 		Int.random(in: range)
 	}
 	
-	private func randomCharacter<C: CharacterCollection>(in collection: C) -> Character {
+	private static func randomCharacter<C: CharacterCollection>(in collection: C) -> Character {
 		collection.randomElement()!
 	}
 	
-	private func randomConsonant() -> [Character] {
+	private static func randomConsonant() -> [Character] {
 		[randomCharacter(in: CharacterSet.unambiguousLowerConsonants)]
 	}
 	
-	private func randomVowel() -> [Character] {
+	private static func randomVowel() -> [Character] {
 		[randomCharacter(in: CharacterSet.unambiguousLowerVowels)]
 	}
 	
-	private func randomDigit() -> [Character] {
+	private static func randomDigit() -> [Character] {
 		[randomCharacter(in: CharacterSet.digit)]
 	}
 	
-	private func randomSyllable() -> [Character] {
+	private static func randomSyllable() -> [Character] {
 		randomConsonant() + randomVowel() + randomConsonant()
 	}
 	
-	private func randomWord() -> [Character] {
+	private static func randomWord() -> [Character] {
 		randomSyllable() + randomSyllable()
 	}
 	
 	
-	private func moreTypeablePassword(numberOfMinimumCharacters: Int) -> [Character] {
+	private static func moreTypeablePassword(numberOfMinimumCharacters: Int) -> [Character] {
 		var components = [[Character]]()
 		
 		// Generate enough words to satisfy minimum number of characters
@@ -166,7 +202,7 @@ struct Generator {
 		}
 	}
 	
-	private func classicPassword(numberOfRandomCharacters: Int, from characterPool: CharacterSet) -> [Character] {
+	private static func classicPassword(numberOfRandomCharacters: Int, from characterPool: CharacterSet) -> [Character] {
 		var randomCharArray = [Character]()
 		for _ in 0..<numberOfRandomCharacters {
 			randomCharArray.append(randomCharacter(in: characterPool))
@@ -174,7 +210,7 @@ struct Generator {
 		return randomCharArray
 	}
 	
-	private func splitArray<T>(_ array: [T], separator: T, groupSize: Int) -> [T] {
+	private static func splitArray<T>(_ array: [T], separator: T, groupSize: Int) -> [T] {
 		var components: [ArraySlice<T>] = []
 		var startIndex = array.startIndex
 		while startIndex < array.endIndex {
@@ -186,12 +222,17 @@ struct Generator {
 	}
 	
 	
-	private func passwordHasNotExceededConsecutiveCharLimit(password: [Character], consecutiveCharLimit: Int) -> Bool {
+	private static func passwordHasNotExceededConsecutiveCharacterLimit(password: [Character], limit: Int) -> Bool {
+		if limit < 1 {
+			return true
+		}
+		
 		let passwordUnicodeScalars = password.flatMap(\.unicodeScalars)
 		var longestConsecutiveCharLength = 1
 		var firstConsecutiveCharIndex = 0
 		// Both "123" or "abc" and "321" or "cba" are considered consecutive.
 		var isSequenceAscending: Bool?
+		
 		for i in 1..<passwordUnicodeScalars.count {
 			let currCharCode = passwordUnicodeScalars[i].value
 			let prevCharCode = passwordUnicodeScalars[i-1].value
@@ -235,13 +276,18 @@ struct Generator {
 			}
 		}
 		
-		return longestConsecutiveCharLength <= consecutiveCharLimit
+		return longestConsecutiveCharLength <= limit
 	}
 	
-	private func passwordHasNotExceededRepeatedCharLimit(password: [Character], repeatedCharLimit: Int) -> Bool {
+	private static func passwordHasNotExceededRepeatedCharacterLimit(password: [Character], limit: Int) -> Bool {
+		if limit < 1 {
+			return true
+		}
+		
 		var longestRepeatedCharLength = 1
 		var lastRepeatedChar = password[0]
 		var lastRepeatedCharIndex = 0
+		
 		for i in 1..<password.count {
 			let currChar = password[i]
 			if currChar == lastRepeatedChar {
@@ -256,10 +302,11 @@ struct Generator {
 			lastRepeatedChar = currChar
 			lastRepeatedCharIndex = i
 		}
-		return longestRepeatedCharLength <= repeatedCharLimit
+		
+		return longestRepeatedCharLength <= limit
 	}
 	
-	private func passwordContainsRequiredCharacters(password: [Character], requiredCharacterSets: [CharacterSet]) -> Bool {
+	private static func passwordContainsRequiredCharacters(password: [Character], requiredCharacterSets: [CharacterSet]) -> Bool {
 		for requiredCharacterSet in requiredCharacterSets {
 			var hasRequiredChar = false
 			for char in password {
@@ -273,39 +320,5 @@ struct Generator {
 			}
 		}
 		return true
-	}
-	
-	
-	func generatePassword() -> String {
-		while true {
-			var password = [Character]()
-			
-			switch style {
-				case .random:
-					password = classicPassword(numberOfRandomCharacters: numberOfCharacters, from: characterPool)
-					if let group {
-						password = splitArray(password, separator: group.separator, groupSize: group.size)
-					}
-					
-					if !passwordContainsRequiredCharacters(password: password, requiredCharacterSets: requiredCharacterSets) {
-						continue
-					}
-					
-				case .nice:
-					password = moreTypeablePassword(numberOfMinimumCharacters: numberOfCharacters)
-					if let group {
-						password = splitArray(password, separator: group.separator, groupSize: group.size)
-					}
-			}
-			
-			if let repeatedCharacterLimit, repeatedCharacterLimit >= 1, !passwordHasNotExceededRepeatedCharLimit(password: password, repeatedCharLimit: repeatedCharacterLimit) {
-				continue
-			}
-			if let consecutiveCharacterLimit, consecutiveCharacterLimit >= 1, !passwordHasNotExceededConsecutiveCharLimit(password: password, consecutiveCharLimit: consecutiveCharacterLimit) {
-				continue
-			}
-			
-			return String(password)
-		}
 	}
 }
