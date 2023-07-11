@@ -21,7 +21,7 @@ struct PasswordGenerator {
 	
 	static let defaultGroupSeparator: Character = "-"
 	static let defaultAllowedCharacters: CharacterSet = .unambiguous
-	static let defaultRequiredCharacterSets: [CharacterSet] = [.lower, .upper, .digit]
+	static let defaultRequiredCharacterSets: [CharacterSet] = [.lower, .upper, .digits]
 	
 	private let passwordFunction: () -> [Character]
 	private let group: (size: Int, separator: Character)?
@@ -76,7 +76,7 @@ struct PasswordGenerator {
 		let upperConsonants: CharacterSet = .upperConsonants.intersection(allowedCharacters)
 		let lowerVowels: CharacterSet = .lowerVowels.intersection(allowedCharacters)
 		let upperVowels: CharacterSet = .upperVowels.intersection(allowedCharacters)
-		let digits: CharacterSet = .digit.intersection(allowedCharacters)
+		let digits: CharacterSet = .digits.intersection(allowedCharacters)
 		
 		switch style {
 			case .random:

@@ -15,11 +15,11 @@ extension PasswordGenerator {
 extension PasswordGenerator.CharacterSet {
 	static let lower = Self("abcdefghijklmnopqrstuvwxyz")
 	static let upper = Self("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	static let digit = Self("0123456789")
+	static let digits = Self("0123456789")
 	static let special = Self(#"-~!@#$%^&*_+=`|(){}[:;\"'<>,.?/ ]"#)
 	
-	static let ascii = Self(joined: .lower, .upper, .digit, .special)
-	static let alphanumeric = Self(joined: .lower, .upper, .digit)
+	static let ascii = Self(joined: .lower, .upper, .digits, .special)
+	static let alphanumeric = Self(joined: .lower, .upper, .digits)
 	static let unambiguous = Self.ascii.subtracting("lO")
 	
 	static let lowerVowels = Self("aeiouy")
