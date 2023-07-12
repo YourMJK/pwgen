@@ -31,7 +31,7 @@ struct PasswordGenerator {
 	
 	init(
 		style: Style,
-		minLength: Int,
+		minimumLength: Int,
 		grouped: Bool,
 		groupSeparator: Character = Self.defaultGroupSeparator,
 		allowedCharacters: CharacterSet = Self.defaultAllowedCharacters,
@@ -51,12 +51,12 @@ struct PasswordGenerator {
 		var split = false
 		if grouped {
 			let splitSize = groupSize + 1
-			numberOfSplits = (minLength - numberOfCharacters + splitSize - 1) / splitSize
+			numberOfSplits = (minimumLength - numberOfCharacters + splitSize - 1) / splitSize
 			numberOfCharacters += numberOfSplits * groupSize
 			split = numberOfSplits > 0
 		}
 		else {
-			numberOfCharacters = minLength
+			numberOfCharacters = minimumLength
 		}
 		
 		// For each separator inserted due to splitting, remove a character set that requires the separator character
