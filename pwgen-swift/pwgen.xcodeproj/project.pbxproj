@@ -315,15 +315,15 @@
 /* Begin XCRemoteSwiftPackageReference section */
 		1843267C2A4F92B70039E73E /* XCRemoteSwiftPackageReference "CommandLineTool" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/YourMJK/CommandLineTool.git";
+			repositoryURL = "https://github.com/YourMJK/CommandLineTool";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
 			};
 		};
 		18F26D702A55BBA10078AF71 /* XCRemoteSwiftPackageReference "swift-collections" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-collections.git";
+			repositoryURL = "https://github.com/apple/swift-collections";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.0.0;
