@@ -14,7 +14,7 @@ struct Command: ParsableCommand {
 	static var configuration: CommandConfiguration {
 		CommandConfiguration(
 			commandName: executableName,
-			version: "1.0.0",
+			version: "1.0.1",
 			helpMessageLabelColumnWidth: 20,
 			alwaysCompactUsageOptions: true
 		)
@@ -61,7 +61,7 @@ struct Command: ParsableCommand {
 	var generalOptions: GeneralOptions
 	
 	func run() throws {
-		let generator = PasswordGenerator(
+		let generator = try PasswordGenerator(
 			style: passwordOptions.random ? .random : .nice,
 			minimumLength: passwordOptions.minimumLength,
 			grouped: !passwordOptions.noGroup,

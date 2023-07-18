@@ -38,7 +38,7 @@ struct PasswordGenerator {
 		requiredCharacterSets: [CharacterSet] = Self.defaultRequiredCharacterSets,
 		repeatedCharacterLimit: Int? = nil,
 		consecutiveCharacterLimit: Int? = nil
-	) {
+	) throws {
 		// Calculate the number of characters and splits such that the resulting length satisfies the specified minimum length
 		let groupSize = {
 			switch style {
@@ -82,15 +82,19 @@ struct PasswordGenerator {
 			case .random:
 				// If we have more requirements of the type "need a character from set" than the length of the password we want to generate, then
 				// we will never be able to meet these requirements, and we'll end up in an infinite loop generating passwords.
-				precondition(requiredCharacterSets.count <= numberOfCharacters, "Unable to meet requirements: More required character sets (\(requiredCharacterSets.count)) specified than number of password characters (\(numberOfCharacters)) to generate")
+				guard requiredCharacterSets.count <= numberOfCharacters else {
+					throw RequirementsError.moreCharacterSetsThanCharacters(requiredCharacterSetsCount: requiredCharacterSets.count, numberOfCharacters: numberOfCharacters)
+				}
 				
 				self.passwordFunction = {
 					Self.classicPassword(numberOfRandomCharacters: numberOfCharacters, from: characterPool)
 				}
 			case .nice:
 				// If the requirements don't allow at least one character of each of these types, we can't generate a moreTypeablePassword.
-				[lowerConsonants, upperConsonants, lowerVowels, upperVowels, digits].forEach {
-					precondition(!$0.isEmpty, "Unable to meet requirements: For a password of style \"nice\", allowed characters must contain a lowercase and uppercase consonant and vowel and a digit")
+				try [lowerConsonants, upperConsonants, lowerVowels, upperVowels, digits].forEach {
+					guard !$0.isEmpty else {
+						throw RequirementsError.nicePasswordMissingAllowedCharacters
+					}
 				}
 				
 				self.passwordFunction = {

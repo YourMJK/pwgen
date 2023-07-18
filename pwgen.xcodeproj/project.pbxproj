@@ -11,6 +11,7 @@
 		1843267E2A4F92B70039E73E /* CommandLineTool in Frameworks */ = {isa = PBXBuildFile; productRef = 1843267D2A4F92B70039E73E /* CommandLineTool */; };
 		18F26D722A55BBA10078AF71 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = 18F26D712A55BBA10078AF71 /* OrderedCollections */; };
 		18F26D742A5B927C0078AF71 /* PasswordGenerator.CharacterSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F26D732A5B927C0078AF71 /* PasswordGenerator.CharacterSet.swift */; };
+		18F6BFD62A66956900E48CA2 /* PasswordGenerator.RequirementsError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F6BFD52A66956900E48CA2 /* PasswordGenerator.RequirementsError.swift */; };
 		18F72E992A4FAC0C0037B09E /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F72E982A4FAC0C0037B09E /* PasswordGenerator.swift */; };
 /* End PBXBuildFile section */
 
@@ -31,6 +32,7 @@
 		184326642A4F84E20039E73E /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
 		1843267A2A4F91B80039E73E /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		18F26D732A5B927C0078AF71 /* PasswordGenerator.CharacterSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.CharacterSet.swift; sourceTree = "<group>"; };
+		18F6BFD52A66956900E48CA2 /* PasswordGenerator.RequirementsError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.RequirementsError.swift; sourceTree = "<group>"; };
 		18F72E982A4FAC0C0037B09E /* PasswordGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -71,6 +73,7 @@
 				184326642A4F84E20039E73E /* Command.swift */,
 				18F72E982A4FAC0C0037B09E /* PasswordGenerator.swift */,
 				18F26D732A5B927C0078AF71 /* PasswordGenerator.CharacterSet.swift */,
+				18F6BFD52A66956900E48CA2 /* PasswordGenerator.RequirementsError.swift */,
 			);
 			path = pwgen;
 			sourceTree = "<group>";
@@ -150,6 +153,7 @@
 			files = (
 				184326652A4F84E20039E73E /* Command.swift in Sources */,
 				18F72E992A4FAC0C0037B09E /* PasswordGenerator.swift in Sources */,
+				18F6BFD62A66956900E48CA2 /* PasswordGenerator.RequirementsError.swift in Sources */,
 				18F26D742A5B927C0078AF71 /* PasswordGenerator.CharacterSet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
