@@ -1,35 +1,38 @@
-.PHONY: build macos linux dir install clean distclean
-
 PRODUCT = pwgen
-DEST = build
+DIR = bin
 SWIFTBUILD = swift build -c release --product $(PRODUCT)
 BINARY = .build/release/$(PRODUCT)
 PREFIX = /usr/local
 
-build: $(BINARY) dir
-	@cp -v $(BINARY) $(DEST)/
+.PHONY: build $(BINARY) macos linux install uninstall clean distclean
+
+build: $(BINARY) $(DIR)
+	@cp -v $(BINARY) $(DIR)/
 
 $(BINARY):
 	$(SWIFTBUILD)
 
+$(DIR):
+	mkdir $(DIR)
+
 macos: BINARY = .build/apple/Products/Release/$(PRODUCT)
-macos: dir
+macos: $(DIR)
 	$(SWIFTBUILD) --arch arm64 --arch x86_64
-	@cp -v $(BINARY) $(DEST)/$(PRODUCT)_macos
+	@cp -v $(BINARY) $(DIR)/$(PRODUCT)_macos
 
-linux: dir
+linux: $(DIR)
 	$(SWIFTBUILD) --static-swift-stdlib
-	@cp -v $(BINARY) $(DEST)/$(PRODUCT)_linux
-
-dir:
-	@mkdir -p $(DEST)
+	@cp -v $(BINARY) $(DIR)/$(PRODUCT)_linux
 
 install: $(BINARY)
 	@cp -v $(BINARY) $(PREFIX)/bin/
 
+uninstall:
+	rm -f $(PREFIX)/bin/$(PRODUCT)
+
 clean:
 	swift package clean
-	rm -rf $(DEST)
+	rm -rf $(DIR)
 
 distclean: clean
 	rm -rf Package.resolved
