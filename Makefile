@@ -2,15 +2,19 @@ PRODUCT = pwgen
 DIR = bin
 SWIFTBUILD = swift build -c release --product $(PRODUCT)
 BINARY = .build/release/$(PRODUCT)
+MANUAL = .build/plugins/GenerateManual/outputs/$(PRODUCT)/$(PRODUCT).1
 PREFIX = /usr/local
 
-.PHONY: build $(BINARY) macos linux install uninstall clean distclean
+.PHONY: build $(BINARY) $(MANUAL) macos linux install uninstall clean distclean
 
 build: $(BINARY) $(DIR)
 	@cp -v $(BINARY) $(DIR)/
 
 $(BINARY):
 	$(SWIFTBUILD)
+
+$(MANUAL):
+	swift package plugin generate-manual
 
 $(DIR):
 	mkdir $(DIR)
@@ -24,11 +28,13 @@ linux: $(DIR)
 	$(SWIFTBUILD) --static-swift-stdlib
 	@cp -v $(BINARY) $(DIR)/$(PRODUCT)_linux
 
-install: $(BINARY)
+install: $(BINARY) #$(MANUAL)
 	@cp -v $(BINARY) $(PREFIX)/bin/
+	@#cp -v $(MANUAL) $(PREFIX)/share/man/man1/
 
 uninstall:
 	rm -f $(PREFIX)/bin/$(PRODUCT)
+	@#rm -f $(PREFIX)/share/man/man1/$(PRODUCT).1
 
 clean:
 	swift package clean
