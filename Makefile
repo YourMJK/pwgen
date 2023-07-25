@@ -27,12 +27,12 @@ build: $(BINARY) $(DIR)
 	@cp -v $(BINARY) $(DIR)/
 
 install: $(BINARY) #$(MANUAL)
-	@cp -v $(BINARY) $(PREFIX)/bin/
-	@#cp -v $(MANUAL) $(PREFIX)/share/man/man1/
+	sudo cp -v $(BINARY) $(PREFIX)/bin/
+	@#sudo cp -v $(MANUAL) $(PREFIX)/share/man/man1/
 
 uninstall:
-	rm -f $(PREFIX)/bin/$(PRODUCT)
-	@#rm -f $(PREFIX)/share/man/man1/$(PRODUCT).1
+	sudo rm -f $(PREFIX)/bin/$(PRODUCT)
+	@#sudo rm -f $(PREFIX)/share/man/man1/$(PRODUCT).1
 
 clean:
 	swift package clean
