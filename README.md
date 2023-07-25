@@ -10,21 +10,28 @@ This tool can generate passwords in the same style ("more typeable" and uniforml
 USAGE:  pwgen [OPTIONS ...]
 
 PASSWORD OPTIONS:
-  -l <amount>       The minimum number of characters the password should be long. Always
-                    matches actual length if "--random" and "--no-group" flags are both set.
-                    (default: 18)
-  -r, --random      Uniformly choose a random character for each position instead of generating
-                    a "more typeable" password.
-  -g, --no-group    Don't split password into more readable groups of characters by inserting
-                    the separator character (dash by default) at equal intervals.
-  -s <character>    The separator character used for splitting the password into groups.
-                    Ignored when "--no-group" flag is set. (default: -)
+  -l <amount>             The minimum number of characters the password should be long. Always
+                          matches actual length if "--random" and "--no-group" flags are both
+                          set. (default: 18)
+  -r, --random            Uniformly choose a random character for each position instead of
+                          generating a "more typeable" password.
+  -g, --no-group          Don't split password into more readable groups of characters by
+                          inserting the separator character (dash by default) at equal
+                          intervals.
+  -s <character>          The separator character used for splitting the password into groups.
+                          Ignored when "--no-group" flag is set. (default: -)
+  --repeated <amount>     The maximum allowed length for any sequence of repeated characters in
+                          the password. E.g. for "aaba" the longest sequence has a length of 2.
+                          Unlimited if not specified.
+  --consecutive <amount>  The maximum allowed length for any sequence of consecutive characters
+                          in the password. E.g. both "123" or "abc" and "321" or "cba" are
+                          considered consecutive. Unlimited if not specified.
 
 GENERAL OPTIONS:
-  -n <amount>       The number of passwords to generate. Each password will be printed in a new
-                    line. (default: 1)
-  --version         Show the version.
-  -h, --help        Show help information.
+  -n <amount>             The number of passwords to generate. Each password will be printed in
+                          a new line. (default: 1)
+  --version               Show the version.
+  -h, --help              Show help information.
 ```
 
 ## Examples

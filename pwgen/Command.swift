@@ -14,8 +14,8 @@ struct Command: ParsableCommand {
 	static var configuration: CommandConfiguration {
 		CommandConfiguration(
 			commandName: executableName,
-			version: "1.0.1",
-			helpMessageLabelColumnWidth: 20,
+			version: "1.1.0",
+			helpMessageLabelColumnWidth: 26,
 			alwaysCompactUsageOptions: true
 		)
 	}
@@ -33,12 +33,28 @@ struct Command: ParsableCommand {
 		@Option(name: .short, help: ArgumentHelp("The separator character used for splitting the password into groups. Ignored when \"--no-group\" flag is set.", valueName: "character"))
 		var separator: String = String(PasswordGenerator.defaultGroupSeparator)
 		
+		@Option(name: .long, help: ArgumentHelp("The maximum allowed length for any sequence of repeated characters in the password. E.g. for \"aaba\" the longest sequence has a length of 2. Unlimited if not specified.", valueName: "amount"))
+		var repeated: Int?
+		
+		@Option(name: .long, help: ArgumentHelp("The maximum allowed length for any sequence of consecutive characters in the password. E.g. both \"123\" or \"abc\" and \"321\" or \"cba\" are considered consecutive. Unlimited if not specified.", valueName: "amount"))
+		var consecutive: Int?
+		
 		mutating func validate() throws {
 			guard minimumLength > 0 else {
 				throw ValidationError("Please specify a 'minimum length' greater than 0.")
 			}
 			guard separator.count == 1 else {
 				throw ValidationError("Please specify exactly one 'separator' character.")
+			}
+			if let repeated {
+				guard repeated > 0 else {
+					throw ValidationError("Please specify a 'repeated character limit' greater than 0.")
+				}
+			}
+			if let consecutive {
+				guard consecutive > 0 else {
+					throw ValidationError("Please specify a 'consecutive character limit' greater than 0.")
+				}
 			}
 		}
 	}
@@ -65,7 +81,9 @@ struct Command: ParsableCommand {
 			style: passwordOptions.random ? .random : .nice,
 			minimumLength: passwordOptions.minimumLength,
 			grouped: !passwordOptions.noGroup,
-			groupSeparator: passwordOptions.separator.first!
+			groupSeparator: passwordOptions.separator.first!,
+			repeatedCharacterLimit: passwordOptions.repeated,
+			consecutiveCharacterLimit: passwordOptions.consecutive
 		)
 		for _ in 0..<generalOptions.numberOfPasswords {
 			stdout(generator.newPassword())
