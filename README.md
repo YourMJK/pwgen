@@ -48,20 +48,34 @@ $ pwgen -r -g -l 24
 5vzDKJZiNHBF93j61G7tm1ET
 ```
 
+## Download compiled binaries
+
+Instead of building the tool yourself, you can download a compiled binary for macOS and Linux from the [latest release](https://github.com/YourMJK/pwgen/releases/latest).
+
+The Linux binaries are statically linked with the Swift stdlib and thus no installation of Swift is required.
+
 ## Build prerequisites
 
-To build the package, the Swift toolchain version 5.7 or higher needs to be installed.  
-- For macOS either [download Xcode from the AppStore](https://apps.apple.com/us/app/xcode/id497799835) or run `xcode-select --install` to just get the Command Line Tools. Swift 5.7 requires at least Xcode 14 and macOS 12.5 Monterey.
+To build the package, the Swift toolchain version 5.7 or higher needs to be installed.
+- For macOS either [download Xcode from the AppStore](https://apps.apple.com/us/app/xcode/id497799835) or run `xcode-select --install` to just get the Command Line Tools.  
+Swift 5.7 requires at least Xcode 14 and macOS 12.5 Monterey.
 - For Linux [download Swift from swift.org](https://www.swift.org/download/) for your distro and follow the installation guide further down the page.
 
-## How to build
+## Build with `make`
 
-- **Variant 1**:  
-Run `make` to build the Swift Package.
-- **Variant 2** (macOS only):  
+Build the Swift Package and copy executable to `bin/`:
+```
+$ make
+```
+Automatically install executable into `/usr/local/bin/`:
+```
+$ make install
+```
+
+## Build with Xcode (macOS only):  
 Open the Xcode project and go to *Product > Build* (⌘B).
 
-After using one of these two variants to build the binary, you can either run it directly from `build/pwgen` or install it to your PATH location by running  
-`make install`  
-or by manually copying it, e.g.:  
-`$ cp build/pwgen /usr/local/bin/`
+After that, either run it directly from `bin/pwgen` or install it to your PATH location by manually copying it, e.g.:
+```
+$ cp build/pwgen /usr/local/bin/
+```
