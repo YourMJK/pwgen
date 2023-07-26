@@ -57,7 +57,7 @@ $ pwgen -r -g -l 24
 
 ## Download compiled binaries
 
-Instead of building the tool yourself, you can download a compiled binary for macOS and Linux from the [latest release](https://github.com/YourMJK/pwgen/releases/latest).
+Instead of building the tool yourself, you can download a compiled binary for macOS and Linux from the [latest&nbsp;release](https://github.com/YourMJK/pwgen/releases/latest).
 
 The Linux binaries are statically linked with the Swift stdlib and thus no installation of Swift is required.
 
