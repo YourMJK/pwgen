@@ -70,7 +70,7 @@ $ pwgen -r -g -l 24
 
 ## Download compiled binaries
 
-Instead of building the tool yourself, you can download a compiled binary for macOS and Linux from the [latest&nbsp;release](https://github.com/YourMJK/pwgen/releases/latest).
+Instead of building the tool yourself, you can download a compiled binary for macOS and Linux from the [**latest&nbsp;release**](https://github.com/YourMJK/pwgen/releases/latest).
 
 The Linux binaries are statically linked with the Swift stdlib and thus no installation of Swift is required.
 
@@ -97,5 +97,5 @@ Open the Xcode project and go to *Product > Build* (⌘B).
 
 After that, either run it directly from `bin/pwgen` or install it to your PATH location by manually copying it, e.g.:
 ```
-$ cp build/pwgen /usr/local/bin/
+$ cp bin/pwgen /usr/local/bin/
 ```
