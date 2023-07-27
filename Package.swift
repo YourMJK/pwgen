@@ -9,7 +9,7 @@ let package = Package(
 		.executable(name: "pwgen", targets: ["pwgen"]),
 	],
 	dependencies: [
-		.package(url: "https://github.com/YourMJK/CommandLineTool", from: "1.0.0"),
+		.package(url: "https://github.com/YourMJK/CommandLineTool", from: "1.1.0"),
 		.package(url: "https://github.com/apple/swift-collections", .upToNextMajor(from: "1.0.0")),
 	],
 	targets: [
