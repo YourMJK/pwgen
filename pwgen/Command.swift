@@ -14,8 +14,8 @@ struct Command: ParsableCommand {
 	static var configuration: CommandConfiguration {
 		CommandConfiguration(
 			commandName: executableName,
-			version: "1.1.0",
-			helpMessageLabelColumnWidth: 26,
+			version: "1.2.0",
+			helpMessageLabelColumnWidth: 36,
 			alwaysCompactUsageOptions: true
 		)
 	}
@@ -32,6 +32,12 @@ struct Command: ParsableCommand {
 		
 		@Option(name: .short, help: ArgumentHelp("The separator character used for splitting the password into groups. Ignored when \"--no-group\" flag is set.", valueName: "character"))
 		var separator: String = String(PasswordGenerator.defaultGroupSeparator)
+		
+		@Option(name: .long, help: ArgumentHelp("The set of characters which are allowed to occur in the password. Specify any of (\(CharacterSetString.allCasesRegexString)) or a custom string of (ASCII-printable) characters surrounded by [ and ], e.g. \"[abc123]\".", valueName: "character set"))
+		var allowed: String = CharacterSetString.string(from: PasswordGenerator.defaultAllowedCharacters)
+		
+		@Option(name: .long, parsing: .upToNextOption, help: ArgumentHelp("The required character sets. The generated password will contain at least one character of each specified required set. See help for the \"--allowed\" option on how to specify character sets. Characters not present in the allowed characters will be removed from each set.", valueName: "character set ..."))
+		var required: [String] = PasswordGenerator.defaultRequiredCharacterSets.map(CharacterSetString.string(from:))
 		
 		@Option(name: .long, help: ArgumentHelp("The maximum allowed length for any sequence of repeated characters in the password. E.g. for \"aaba\" the longest sequence has a length of 2. Unlimited if not specified.", valueName: "amount"))
 		var repeated: Int?
@@ -77,11 +83,16 @@ struct Command: ParsableCommand {
 	var generalOptions: GeneralOptions
 	
 	func run() throws {
+		let allowedCharacters = try CharacterSetString.characterSet(from: passwordOptions.allowed)
+		let requiredCharacterSets = try passwordOptions.required.map(CharacterSetString.characterSet(from:))
+		
 		let generator = try PasswordGenerator(
 			style: passwordOptions.random ? .random : .nice,
 			minimumLength: passwordOptions.minimumLength,
 			grouped: !passwordOptions.noGroup,
 			groupSeparator: passwordOptions.separator.first!,
+			allowedCharacters: allowedCharacters,
+			requiredCharacterSets: requiredCharacterSets,
 			repeatedCharacterLimit: passwordOptions.repeated,
 			consecutiveCharacterLimit: passwordOptions.consecutive
 		)
