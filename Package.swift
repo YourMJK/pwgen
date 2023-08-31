@@ -7,6 +7,7 @@ let package = Package(
 	name: "pwgen",
 	products: [
 		.executable(name: "pwgen", targets: ["pwgen"]),
+		.library(name: "PasswordGenerator", targets: ["PasswordGenerator"]),
 	],
 	dependencies: [
 		.package(url: "https://github.com/YourMJK/CommandLineTool", from: "1.1.0"),
@@ -17,9 +18,16 @@ let package = Package(
 			name: "pwgen",
 			dependencies: [
 				"CommandLineTool",
-				.product(name: "OrderedCollections", package: "swift-collections")
+				"PasswordGenerator",
 			],
 			path: "pwgen"
+		),
+		.target(
+			name: "PasswordGenerator",
+			dependencies: [
+				.product(name: "OrderedCollections", package: "swift-collections")
+			],
+			path: "PasswordGenerator"
 		),
 	]
 )

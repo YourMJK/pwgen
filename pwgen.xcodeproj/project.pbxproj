@@ -7,14 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1833FBA92AA13C46008B2058 /* CharacterSetString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1833FBA82AA13C46008B2058 /* CharacterSetString.swift */; };
+		1833FBB72AA13E14008B2058 /* PasswordGenerator.RequirementsError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1833FBA12AA137EC008B2058 /* PasswordGenerator.RequirementsError.swift */; };
+		1833FBB82AA13E14008B2058 /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1833FBA02AA137EC008B2058 /* PasswordGenerator.swift */; };
+		1833FBB92AA13E14008B2058 /* PasswordGenerator.CharacterSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1833FBA32AA137EC008B2058 /* PasswordGenerator.CharacterSet.swift */; };
+		1833FBBA2AA13EB7008B2058 /* libPasswordGenerator.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1833FBAE2AA13E09008B2058 /* libPasswordGenerator.a */; };
+		1833FBC02AA14218008B2058 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = 1833FBBF2AA14218008B2058 /* OrderedCollections */; };
 		184326652A4F84E20039E73E /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184326642A4F84E20039E73E /* Command.swift */; };
 		1843267E2A4F92B70039E73E /* CommandLineTool in Frameworks */ = {isa = PBXBuildFile; productRef = 1843267D2A4F92B70039E73E /* CommandLineTool */; };
-		188E96DC2A712DDE001462B9 /* CharacterSetString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188E96DB2A712DDE001462B9 /* CharacterSetString.swift */; };
-		18F26D722A55BBA10078AF71 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = 18F26D712A55BBA10078AF71 /* OrderedCollections */; };
-		18F26D742A5B927C0078AF71 /* PasswordGenerator.CharacterSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F26D732A5B927C0078AF71 /* PasswordGenerator.CharacterSet.swift */; };
-		18F6BFD62A66956900E48CA2 /* PasswordGenerator.RequirementsError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F6BFD52A66956900E48CA2 /* PasswordGenerator.RequirementsError.swift */; };
-		18F72E992A4FAC0C0037B09E /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F72E982A4FAC0C0037B09E /* PasswordGenerator.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1833FBBB2AA13EB7008B2058 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 184326592A4F84E20039E73E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1833FBAD2AA13E09008B2058;
+			remoteInfo = PasswordGenerator;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		1843265F2A4F84E20039E73E /* CopyFiles */ = {
@@ -29,33 +40,53 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1833FBA02AA137EC008B2058 /* PasswordGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
+		1833FBA12AA137EC008B2058 /* PasswordGenerator.RequirementsError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.RequirementsError.swift; sourceTree = "<group>"; };
+		1833FBA32AA137EC008B2058 /* PasswordGenerator.CharacterSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.CharacterSet.swift; sourceTree = "<group>"; };
+		1833FBA82AA13C46008B2058 /* CharacterSetString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterSetString.swift; sourceTree = "<group>"; };
+		1833FBAE2AA13E09008B2058 /* libPasswordGenerator.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPasswordGenerator.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		184326612A4F84E20039E73E /* pwgen */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pwgen; sourceTree = BUILT_PRODUCTS_DIR; };
 		184326642A4F84E20039E73E /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
 		1843267A2A4F91B80039E73E /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
-		188E96DB2A712DDE001462B9 /* CharacterSetString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterSetString.swift; sourceTree = "<group>"; };
-		18F26D732A5B927C0078AF71 /* PasswordGenerator.CharacterSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.CharacterSet.swift; sourceTree = "<group>"; };
-		18F6BFD52A66956900E48CA2 /* PasswordGenerator.RequirementsError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.RequirementsError.swift; sourceTree = "<group>"; };
-		18F72E982A4FAC0C0037B09E /* PasswordGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1833FBAC2AA13E09008B2058 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1843265E2A4F84E20039E73E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				18F26D722A55BBA10078AF71 /* OrderedCollections in Frameworks */,
+				1833FBBA2AA13EB7008B2058 /* libPasswordGenerator.a in Frameworks */,
 				1843267E2A4F92B70039E73E /* CommandLineTool in Frameworks */,
+				1833FBC02AA14218008B2058 /* OrderedCollections in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1833FB9F2AA137EC008B2058 /* PasswordGenerator */ = {
+			isa = PBXGroup;
+			children = (
+				1833FBA02AA137EC008B2058 /* PasswordGenerator.swift */,
+				1833FBA32AA137EC008B2058 /* PasswordGenerator.CharacterSet.swift */,
+				1833FBA12AA137EC008B2058 /* PasswordGenerator.RequirementsError.swift */,
+			);
+			path = PasswordGenerator;
+			sourceTree = "<group>";
+		};
 		184326582A4F84E20039E73E = {
 			isa = PBXGroup;
 			children = (
 				1843267A2A4F91B80039E73E /* Config.xcconfig */,
 				184326632A4F84E20039E73E /* pwgen */,
+				1833FB9F2AA137EC008B2058 /* PasswordGenerator */,
 				184326622A4F84E20039E73E /* Products */,
 				1843266D2A4F88360039E73E /* Frameworks */,
 			);
@@ -65,6 +96,7 @@
 			isa = PBXGroup;
 			children = (
 				184326612A4F84E20039E73E /* pwgen */,
+				1833FBAE2AA13E09008B2058 /* libPasswordGenerator.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -73,10 +105,7 @@
 			isa = PBXGroup;
 			children = (
 				184326642A4F84E20039E73E /* Command.swift */,
-				188E96DB2A712DDE001462B9 /* CharacterSetString.swift */,
-				18F72E982A4FAC0C0037B09E /* PasswordGenerator.swift */,
-				18F26D732A5B927C0078AF71 /* PasswordGenerator.CharacterSet.swift */,
-				18F6BFD52A66956900E48CA2 /* PasswordGenerator.RequirementsError.swift */,
+				1833FBA82AA13C46008B2058 /* CharacterSetString.swift */,
 			);
 			path = pwgen;
 			sourceTree = "<group>";
@@ -90,7 +119,35 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		1833FBAA2AA13E09008B2058 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
+		1833FBAD2AA13E09008B2058 /* PasswordGenerator */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1833FBB42AA13E09008B2058 /* Build configuration list for PBXNativeTarget "PasswordGenerator" */;
+			buildPhases = (
+				1833FBAA2AA13E09008B2058 /* Headers */,
+				1833FBAB2AA13E09008B2058 /* Sources */,
+				1833FBAC2AA13E09008B2058 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1833FBBE2AA13F35008B2058 /* PBXTargetDependency */,
+			);
+			name = PasswordGenerator;
+			productName = PasswordGenerator;
+			productReference = 1833FBAE2AA13E09008B2058 /* libPasswordGenerator.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 		184326602A4F84E20039E73E /* pwgen */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 184326682A4F84E20039E73E /* Build configuration list for PBXNativeTarget "pwgen" */;
@@ -102,11 +159,12 @@
 			buildRules = (
 			);
 			dependencies = (
+				1833FBBC2AA13EB7008B2058 /* PBXTargetDependency */,
 			);
 			name = pwgen;
 			packageProductDependencies = (
 				1843267D2A4F92B70039E73E /* CommandLineTool */,
-				18F26D712A55BBA10078AF71 /* OrderedCollections */,
+				1833FBBF2AA14218008B2058 /* OrderedCollections */,
 			);
 			productName = pwgen;
 			productReference = 184326612A4F84E20039E73E /* pwgen */;
@@ -122,6 +180,9 @@
 				LastSwiftUpdateCheck = 1420;
 				LastUpgradeCheck = 1420;
 				TargetAttributes = {
+					1833FBAD2AA13E09008B2058 = {
+						CreatedOnToolsVersion = 14.2;
+					};
 					184326602A4F84E20039E73E = {
 						CreatedOnToolsVersion = 14.2;
 					};
@@ -145,26 +206,68 @@
 			projectRoot = "";
 			targets = (
 				184326602A4F84E20039E73E /* pwgen */,
+				1833FBAD2AA13E09008B2058 /* PasswordGenerator */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1833FBAB2AA13E09008B2058 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1833FBB92AA13E14008B2058 /* PasswordGenerator.CharacterSet.swift in Sources */,
+				1833FBB72AA13E14008B2058 /* PasswordGenerator.RequirementsError.swift in Sources */,
+				1833FBB82AA13E14008B2058 /* PasswordGenerator.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1843265D2A4F84E20039E73E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				184326652A4F84E20039E73E /* Command.swift in Sources */,
-				18F72E992A4FAC0C0037B09E /* PasswordGenerator.swift in Sources */,
-				18F6BFD62A66956900E48CA2 /* PasswordGenerator.RequirementsError.swift in Sources */,
-				18F26D742A5B927C0078AF71 /* PasswordGenerator.CharacterSet.swift in Sources */,
-				188E96DC2A712DDE001462B9 /* CharacterSetString.swift in Sources */,
+				1833FBA92AA13C46008B2058 /* CharacterSetString.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		1833FBBC2AA13EB7008B2058 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1833FBAD2AA13E09008B2058 /* PasswordGenerator */;
+			targetProxy = 1833FBBB2AA13EB7008B2058 /* PBXContainerItemProxy */;
+		};
+		1833FBBE2AA13F35008B2058 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 1833FBBD2AA13F35008B2058 /* OrderedCollections */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		1833FBB52AA13E09008B2058 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		1833FBB62AA13E09008B2058 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		184326662A4F84E20039E73E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -300,6 +403,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1833FBB42AA13E09008B2058 /* Build configuration list for PBXNativeTarget "PasswordGenerator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1833FBB52AA13E09008B2058 /* Debug */,
+				1833FBB62AA13E09008B2058 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		1843265C2A4F84E20039E73E /* Build configuration list for PBXProject "pwgen" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -340,15 +452,19 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		1833FBBD2AA13F35008B2058 /* OrderedCollections */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = OrderedCollections;
+		};
+		1833FBBF2AA14218008B2058 /* OrderedCollections */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 18F26D702A55BBA10078AF71 /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = OrderedCollections;
+		};
 		1843267D2A4F92B70039E73E /* CommandLineTool */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 1843267C2A4F92B70039E73E /* XCRemoteSwiftPackageReference "CommandLineTool" */;
 			productName = CommandLineTool;
-		};
-		18F26D712A55BBA10078AF71 /* OrderedCollections */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 18F26D702A55BBA10078AF71 /* XCRemoteSwiftPackageReference "swift-collections" */;
-			productName = OrderedCollections;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

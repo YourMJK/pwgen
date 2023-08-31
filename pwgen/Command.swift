@@ -8,13 +8,14 @@
 import Foundation
 import CommandLineTool
 import ArgumentParser
+import PasswordGenerator
 
 @main
 struct Command: ParsableCommand {
 	static var configuration: CommandConfiguration {
 		CommandConfiguration(
 			commandName: executableName,
-			version: "1.2.0",
+			version: "1.2.1",
 			helpMessageLabelColumnWidth: 36,
 			alwaysCompactUsageOptions: true
 		)
