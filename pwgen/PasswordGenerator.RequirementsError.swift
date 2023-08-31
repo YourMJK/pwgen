@@ -8,13 +8,13 @@
 import Foundation
 
 extension PasswordGenerator {
-	enum RequirementsError: LocalizedError {
+	public enum RequirementsError: LocalizedError {
 		case moreCharacterSetsThanCharacters(requiredCharacterSetsCount: Int, numberOfCharacters: Int)
 		case nicePasswordMissingAllowedCharacters
 		
 		private static let prefix = "Unable to meet requirements:"
 		
-		var errorDescription: String? {
+		public var errorDescription: String? {
 			switch self {
 				case .moreCharacterSetsThanCharacters(let requiredCharacterSetsCount, let numberOfCharacters):
 					return "\(Self.prefix) More required character sets (\(requiredCharacterSetsCount)) specified than number of password characters (\(numberOfCharacters)) to generate"

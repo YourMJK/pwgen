@@ -10,8 +10,8 @@
 import Foundation
 
 
-struct PasswordGenerator {
-	enum Style {
+public struct PasswordGenerator {
+	public enum Style {
 		case random
 		case nice
 	}
@@ -19,9 +19,9 @@ struct PasswordGenerator {
 	private typealias CharacterCollection = Collection<Character>
 	
 	
-	static let defaultGroupSeparator: Character = "-"
-	static let defaultAllowedCharacters: CharacterSet = .unambiguous
-	static let defaultRequiredCharacterSets: [CharacterSet] = [.lower, .upper, .digits]
+	public static let defaultGroupSeparator: Character = "-"
+	public static let defaultAllowedCharacters: CharacterSet = .unambiguous
+	public static let defaultRequiredCharacterSets: [CharacterSet] = [.lower, .upper, .digits]
 	
 	private let passwordFunction: () -> [Character]
 	private let group: (size: Int, separator: Character)?
@@ -29,7 +29,7 @@ struct PasswordGenerator {
 	private let repeatedCharacterLimit: Int?
 	private let consecutiveCharacterLimit: Int?
 	
-	init(
+	public init(
 		style: Style,
 		minimumLength: Int,
 		grouped: Bool,
@@ -129,7 +129,7 @@ struct PasswordGenerator {
 	}
 	
 	
-	func newPassword() -> String {
+	public func newPassword() -> String {
 		while true {
 			var password = passwordFunction()
 			if let group {
