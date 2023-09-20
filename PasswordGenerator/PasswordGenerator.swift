@@ -59,8 +59,9 @@ public struct PasswordGenerator {
 			numberOfCharacters = minimumLength
 		}
 		
+		// Remove empty character sets
+		var requiredCharacterSets = requiredCharacterSets.filter { !$0.isEmpty }
 		// For each separator inserted due to splitting, remove a character set that requires the separator character
-		var requiredCharacterSets = requiredCharacterSets
 		requiredCharacterSets.indices
 			.filter { requiredCharacterSets[$0].contains(groupSeparator) }
 			.prefix(numberOfSplits)
@@ -69,7 +70,6 @@ public struct PasswordGenerator {
 		// Remove any required character not present in the allowed characters
 		requiredCharacterSets = requiredCharacterSets
 			.map { $0.intersection(allowedCharacters) }
-			.filter { !$0.isEmpty }
 		// Set up character sets for generator to randomly choose from
 		let characterPool = CharacterSet(union: requiredCharacterSets)
 		let lowerConsonants: CharacterSet = .lowerConsonants.intersection(allowedCharacters)
@@ -85,16 +85,22 @@ public struct PasswordGenerator {
 				guard requiredCharacterSets.count <= numberOfCharacters else {
 					throw RequirementsError.moreCharacterSetsThanCharacters(requiredCharacterSetsCount: requiredCharacterSets.count, numberOfCharacters: numberOfCharacters)
 				}
+				// If any required character set is empty due to intersection with the allowed characters, we cannot fulfill the requirements.
+				guard requiredCharacterSets.allSatisfy({ !$0.isEmpty }) else {
+					throw RequirementsError.invalidRequiredCharacterSet
+				}
+				// If the character pool is empty (because no required character sets were given), there are no characters to randomly choose from.
+				guard !characterPool.isEmpty else {
+					throw RequirementsError.emptyCharacterPool
+				}
 				
 				self.passwordFunction = {
 					Self.classicPassword(numberOfRandomCharacters: numberOfCharacters, from: characterPool)
 				}
 			case .nice:
 				// If the requirements don't allow at least one character of each of these types, we can't generate a moreTypeablePassword.
-				try [lowerConsonants, upperConsonants, lowerVowels, upperVowels, digits].forEach {
-					guard !$0.isEmpty else {
-						throw RequirementsError.nicePasswordMissingAllowedCharacters
-					}
+				guard [lowerConsonants, upperConsonants, lowerVowels, upperVowels, digits].allSatisfy({ !$0.isEmpty }) else {
+					throw RequirementsError.nicePasswordMissingAllowedCharacters
 				}
 				
 				self.passwordFunction = {
