@@ -261,55 +261,33 @@ public struct PasswordGenerator {
 		}
 		
 		let passwordUnicodeScalars = password.flatMap(\.unicodeScalars)
-		var longestConsecutiveCharLength = 1
-		var firstConsecutiveCharIndex = 0
-		// Both "123" or "abc" and "321" or "cba" are considered consecutive.
 		var isSequenceAscending: Bool?
-		
+		var consecutiveSequenceLength = 0
+		// Both "123" or "abc" and "321" or "cba" are considered consecutive.
 		for i in 1..<passwordUnicodeScalars.count {
 			let currCharCode = passwordUnicodeScalars[i].value
 			let prevCharCode = passwordUnicodeScalars[i-1].value
-			if let _isSequenceAscending = isSequenceAscending {
-				// If `isSequenceAscending` is not nil, then we know that we are in the middle of an existing
-				// pattern. Check if the pattern continues based on whether the previous pattern was
-				// ascending or descending.
-				if (_isSequenceAscending && currCharCode == prevCharCode + 1) || (!_isSequenceAscending && currCharCode == prevCharCode - 1) {
-					continue
-				}
-				
-				// Take into account the case when the sequence transitions from descending
-				// to ascending.
-				if currCharCode == prevCharCode + 1 {
-					firstConsecutiveCharIndex = i - 1
-					isSequenceAscending = true
-					continue
-				}
-				
-				isSequenceAscending = nil
-			} else if currCharCode == prevCharCode + 1 {
-				isSequenceAscending = true
-				continue
+			let areCharCodesAscending: Bool
+			if currCharCode == prevCharCode + 1 {
+				areCharCodesAscending = true
 			} else if currCharCode == prevCharCode - 1 {
-				isSequenceAscending = false
+				areCharCodesAscending = false
+			} else {
+				isSequenceAscending = nil
 				continue
 			}
 			
-			let currConsecutiveCharLength = i - firstConsecutiveCharIndex
-			if currConsecutiveCharLength > longestConsecutiveCharLength {
-				longestConsecutiveCharLength = currConsecutiveCharLength
+			if areCharCodesAscending != isSequenceAscending {
+				isSequenceAscending = areCharCodesAscending
+				consecutiveSequenceLength = 1
 			}
-			
-			firstConsecutiveCharIndex = i
-		}
-		
-		if isSequenceAscending ?? false {
-			let currConsecutiveCharLength = passwordUnicodeScalars.count - firstConsecutiveCharIndex
-			if currConsecutiveCharLength > longestConsecutiveCharLength {
-				longestConsecutiveCharLength = currConsecutiveCharLength
+			consecutiveSequenceLength += 1
+			if consecutiveSequenceLength > limit {
+				return false
 			}
 		}
 		
-		return longestConsecutiveCharLength <= limit
+		return true
 	}
 	
 	private static func passwordHasNotExceededRepeatedCharacterLimit(password: [Character], limit: Int) -> Bool {
@@ -317,26 +295,21 @@ public struct PasswordGenerator {
 			return true
 		}
 		
-		var longestRepeatedCharLength = 1
-		var lastRepeatedChar = password[0]
-		var lastRepeatedCharIndex = 0
-		
-		for i in 1..<password.count {
-			let currChar = password[i]
-			if currChar == lastRepeatedChar {
+		var repeatedChar: Character?
+		var repeatedSequenceLength = 0
+		for char in password {
+			if char != repeatedChar {
+				repeatedChar = char
+				repeatedSequenceLength = 1
 				continue
 			}
-			
-			let currRepeatedCharLength = i - lastRepeatedCharIndex
-			if currRepeatedCharLength > longestRepeatedCharLength {
-				longestRepeatedCharLength = currRepeatedCharLength
+			repeatedSequenceLength += 1
+			if repeatedSequenceLength > limit {
+				return false
 			}
-			
-			lastRepeatedChar = currChar
-			lastRepeatedCharIndex = i
 		}
 		
-		return longestRepeatedCharLength <= limit
+		return true
 	}
 	
 	private static func passwordContainsRequiredCharacters(password: [Character], requiredCharacterSets: [CharacterSet]) -> Bool {
